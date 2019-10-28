@@ -16,18 +16,14 @@ public class NetworkUtils {
     private boolean isOnline() {
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
-        } else {
-            return false;
-        }
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     public boolean checkConnection(){
         if(isOnline()){
             return true;
         }else{
-            Toast.makeText(mContext, "You are not connected to Internet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "You are not connected to Internet.", Toast.LENGTH_SHORT).show();
             return false;
         }
     }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="2dp"
+    android:layout_margin="5dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/iv_wall"
+        android:src="@drawable/circle_icon"
+        app:riv_corner_radius="5dp"
+        android:scaleType="center"
+        android:layout_margin="5dp" />
+    </androidx.cardview.widget.CardView>

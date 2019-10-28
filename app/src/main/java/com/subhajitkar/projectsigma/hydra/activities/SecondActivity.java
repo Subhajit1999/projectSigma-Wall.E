@@ -9,10 +9,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.material.snackbar.Snackbar;
 import com.subhajitkar.projectsigma.hydra.R;
-import com.subhajitkar.projectsigma.hydra.fragments.HomeFragment;
 import com.subhajitkar.projectsigma.hydra.fragments.ImagesFragment;
-import com.subhajitkar.projectsigma.hydra.utils.StaticFinalUtils;
+import com.subhajitkar.projectsigma.hydra.utils.ImagesItem;
+import com.subhajitkar.projectsigma.hydra.utils.NetworkUtils;
+import com.subhajitkar.projectsigma.hydra.utils.StaticUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +33,6 @@ import okhttp3.Response;
 
 public class SecondActivity extends AppCompatActivity {
     private static final String TAG = "SecondActivity";
-    public static ArrayList<String> imagesList;
     public static String urlImage;
 
     private int frag_id;
@@ -37,7 +44,8 @@ public class SecondActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: creating the layout");
         setContentView(R.layout.activity_second);
 
-        imagesList = new ArrayList<>();
+        StaticUtils.imagesList = new ArrayList<>();
+
         getIntentData();  //receiving intent data
 
         getSupportFragmentManager().beginTransaction().replace(R.id.second_fragment_container,
@@ -57,13 +65,13 @@ public class SecondActivity extends AppCompatActivity {
         }
     }
 
-    public void run(String url) throws IOException{
+    public void run() throws IOException{
+        Log.d(TAG, "run: up and running...");
 
         OkHttpClient client = new OkHttpClient();
-
         Request request = new Request.Builder()
-                .header("Authorization", StaticFinalUtils.API_KEY)
-                .url(url)
+                .header("Authorization", StaticUtils.API_KEY)
+                .url(urlImage)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -80,7 +88,32 @@ public class SecondActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d(TAG, "run: integrated successfully: "+myResponse);
+                        Log.d(TAG, "run: integrated successfully: ");
+                        if (!StaticUtils.imagesList.isEmpty()){
+                            StaticUtils.imagesList.clear();
+                        }
+
+                        try {
+                            JSONObject json = new JSONObject(myResponse);
+
+                            JSONArray jsonArray = json.getJSONArray("photos");
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                                int imageId = jsonObject.getInt("id");
+                                String srcName = jsonObject.getString("photographer");
+                                String srcUrl = jsonObject.getString("photographer_url");
+
+                                    JSONObject srcObject = jsonObject.getJSONObject("src");  //getting the image sources of different dimens
+                                    String imgSrc = srcObject.getString("large");
+
+                                StaticUtils.imagesList.add(new ImagesItem(imageId, imgSrc, srcName, srcUrl));
+                                ImagesFragment.adapter.notifyDataSetChanged();
+                            }
+                        } catch (JSONException e) {
+                            Log.d(TAG, "onResponse: Json Parsing data error.");
+                            e.printStackTrace();
+                        }
                     }
                 });
 

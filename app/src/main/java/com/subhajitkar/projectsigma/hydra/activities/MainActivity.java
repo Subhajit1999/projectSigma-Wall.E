@@ -2,6 +2,8 @@ package com.subhajitkar.projectsigma.hydra.activities;
 
 import android.os.Bundle;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -17,6 +19,8 @@ import android.view.MenuItem;
 import com.google.android.material.navigation.NavigationView;
 import com.subhajitkar.projectsigma.hydra.R;
 import com.subhajitkar.projectsigma.hydra.fragments.HomeFragment;
+import com.subhajitkar.projectsigma.hydra.utils.RecyclerAdapter;
+import com.subhajitkar.projectsigma.hydra.utils.StaticUtils;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -36,6 +40,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: setting things up");
 
+        StaticUtils.requestQueue = (RequestQueue) Volley.newRequestQueue(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);

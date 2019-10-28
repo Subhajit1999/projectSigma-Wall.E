@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Wall-E</string>
+    <string name="app_name">Wall.e</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">    Wall-E</string>
-    <string name="nav_header_subtitle">destination for best wallpaers</string>
+    <string name="nav_header_title">    Wall.e</string>
+    <string name="nav_header_subtitle">A destination for best wallpaers</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -16,6 +16,7 @@
     <string name="action_search">Search</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="featured_temp_str">Featured</string>
+    <string name="collections">Collections:</string>
 
 </resources>

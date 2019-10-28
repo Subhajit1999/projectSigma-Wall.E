@@ -23,7 +23,7 @@
 
     <TextView
         android:id="@+id/tv_category"
-        android:text="Featured"
+        android:text="@string/featured_temp_str"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="#fff"

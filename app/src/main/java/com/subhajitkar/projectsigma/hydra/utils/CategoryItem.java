@@ -5,8 +5,8 @@ import android.util.Log;
 public class CategoryItem {
     private static final String TAG = "CategoryItem";
 
-    String mTitle;
-    int mImage;
+    private String mTitle;
+    private int mImage;
 
     public CategoryItem(int image, String title){
         Log.d(TAG, "CategoryItem: constructor");
