@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+        <item android:id="@+id/original"
+            android:title="@string/image_size_original"
+            android:orderInCategory="1"/>
+
+        <item android:id="@+id/large"
+            android:title="@string/image_size_large"
+            android:orderInCategory="2" />
+
+        <item android:id="@+id/medium"
+            android:title="@string/image_size_medium"
+            android:orderInCategory="3"/>
+
+        <item android:id="@+id/small"
+            android:title="@string/image_size_small"
+            android:orderInCategory="4"/>
+
+        <item android:id="@+id/portrait"
+            android:title="@string/image_size_portrait"
+            android:orderInCategory="5"/>
+
+        <item android:id="@+id/landscape"
+            android:title="@string/image_size_landscape"
+            android:orderInCategory="6"/>
+
+        <item android:id="@+id/tiny"
+            android:title="@string/image_size_tiny"
+            android:orderInCategory="7"/>
+</menu>

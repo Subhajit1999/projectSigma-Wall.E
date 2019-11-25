@@ -1,19 +1,30 @@
 package com.subhajitkar.projectsigma.hydra.activities;
 
+import android.app.ActionBar;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.View;
+import android.view.Window;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.snackbar.Snackbar;
 import com.subhajitkar.projectsigma.hydra.R;
 import com.subhajitkar.projectsigma.hydra.fragments.ImagesFragment;
+import com.subhajitkar.projectsigma.hydra.utils.ImageDifferentSize;
 import com.subhajitkar.projectsigma.hydra.utils.ImagesItem;
 import com.subhajitkar.projectsigma.hydra.utils.NetworkUtils;
 import com.subhajitkar.projectsigma.hydra.utils.StaticUtils;
@@ -24,6 +35,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Random;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -36,7 +49,9 @@ public class SecondActivity extends AppCompatActivity {
     public static String urlImage;
 
     private int frag_id;
-    private String search_term;
+    public static String search_term;
+    private Toolbar toolbar;
+    private Context mContext = SecondActivity.this;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,24 +63,50 @@ public class SecondActivity extends AppCompatActivity {
 
         getIntentData();  //receiving intent data
 
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = this.getWindow();
+            window.setStatusBarColor(this.getResources().getColor(R.color.colorPrimaryDark));
+        }
+
+            if (search_term!=null){
+                getSupportActionBar().setTitle(search_term);
+            }else{
+                if (frag_id==0) {
+                    getSupportActionBar().setTitle("Featured");
+                }
+            }
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {  //toolbar navigate button click
+            @Override
+            public void onClick(View v) {
+                onSupportNavigateUp();
+            }
+        });
         getSupportFragmentManager().beginTransaction().replace(R.id.second_fragment_container,
-                new ImagesFragment()).commit();
+                    new ImagesFragment()).commit();
     }
 
     private void getIntentData(){
         Log.d(TAG, "getIntentData: getting the intent-received data");
 
         Intent intent = getIntent();
-        frag_id = intent.getIntExtra("FRAG_CATEGORY_ITEMS",0);
-        search_term = intent.getStringExtra("KEY_SEARCH_TERM");
+        frag_id = intent.getIntExtra(StaticUtils.KEY_FRAG_ID,0);
+        search_term = intent.getStringExtra(StaticUtils.KEY_SEARCH_DATA);
         if (search_term==null){
-            urlImage = "https://api.pexels.com/v1/curated";
+            urlImage = "https://api.pexels.com/v1/curated?per_page=30";
         }else{
-            urlImage = "https://api.pexels.com/v1/search?query="+search_term;
+            int randPage;
+            do{
+                randPage = new Random().nextInt(20);
+            }while(randPage==0);
+            urlImage = "https://api.pexels.com/v1/search?query="+search_term.toLowerCase()+"&per_page=30&page="+randPage;
         }
     }
 
-    public void run() throws IOException{
+    public void run(final Context context) throws IOException{
         Log.d(TAG, "run: up and running...");
 
         OkHttpClient client = new OkHttpClient();
@@ -97,18 +138,30 @@ public class SecondActivity extends AppCompatActivity {
                             JSONObject json = new JSONObject(myResponse);
 
                             JSONArray jsonArray = json.getJSONArray("photos");
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            if (jsonArray.length()>0){
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                                int imageId = jsonObject.getInt("id");
-                                String srcName = jsonObject.getString("photographer");
-                                String srcUrl = jsonObject.getString("photographer_url");
+                                    int imageId = jsonObject.getInt("id");
+                                    String srcName = jsonObject.getString("photographer");
+                                    String srcUrl = jsonObject.getString("photographer_url");
+                                    String dimen = jsonObject.getString("width")+"x"+jsonObject.getString("height");
 
                                     JSONObject srcObject = jsonObject.getJSONObject("src");  //getting the image sources of different dimens
-                                    String imgSrc = srcObject.getString("large");
+                                    String imgSrcOrg = srcObject.getString("original");
+                                    String imgSrcLarg = srcObject.getString("large");
+                                    String imgSrcMid = srcObject.getString("medium");
+                                    String imgSrcSml = srcObject.getString("small");
+                                    String imgSrcPort = srcObject.getString("portrait");
+                                    String imgSrcLand = srcObject.getString("landscape");
+                                    String imgSrcTiny = srcObject.getString("tiny");
+                                    ImageDifferentSize imageArray = new ImageDifferentSize(imgSrcOrg,imgSrcLarg,imgSrcMid,imgSrcSml,imgSrcPort,imgSrcLand,imgSrcTiny);
 
-                                StaticUtils.imagesList.add(new ImagesItem(imageId, imgSrc, srcName, srcUrl));
-                                ImagesFragment.adapter.notifyDataSetChanged();
+                                    StaticUtils.imagesList.add(new ImagesItem(imageId, srcName, dimen, srcUrl,imageArray));
+                                    ImagesFragment.adapter.notifyDataSetChanged();
+                                }
+                            }else{
+                                Toast.makeText(context,"Sorry! No wallpapers found related to your search.",Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {
                             Log.d(TAG, "onResponse: Json Parsing data error.");
@@ -119,5 +172,18 @@ public class SecondActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed: System default back function");
+        super.onBackPressed();
+        supportFinishAfterTransition();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

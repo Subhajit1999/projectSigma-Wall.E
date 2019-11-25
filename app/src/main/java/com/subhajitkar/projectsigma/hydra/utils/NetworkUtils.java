@@ -23,7 +23,7 @@ public class NetworkUtils {
         if(isOnline()){
             return true;
         }else{
-            Toast.makeText(mContext, "You are not connected to Internet.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, StaticUtils.NETWORK_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
             return false;
         }
     }

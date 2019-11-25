@@ -3,7 +3,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">    Wall.e</string>
-    <string name="nav_header_subtitle">A destination for best wallpaers</string>
+    <string name="nav_header_subtitle">A destination for best wallpapers</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -16,7 +16,32 @@
     <string name="action_search">Search</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="featured_temp_str">Featured</string>
     <string name="collections">Collections:</string>
+    <string name="from">from</string>
+    <string name="pexels">Pexels.com</string>
+    <string name="photo_by">Photo by</string>
+    <string name="detail_share">Share</string>
+    <string name="detail_download">Download</string>
+    <string name="detail_save">Save</string>
+    <string name="detail_recommendation">Recommendation:</string>
+    <string name="image_size_original">Original</string>
+    <string name="image_size_large2x">Large2x</string>
+    <string name="image_size_large">Large</string>
+    <string name="image_size_medium">Medium</string>
+    <string name="image_size_small">Small</string>
+    <string name="image_size_portrait">Portrait</string>
+    <string name="image_size_landscape">Landscape</string>
+    <string name="image_size_tiny">Tiny</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="photographer_name_temp">Anonymous</string>
+    <string name="featured_temp_str">Featured</string>
+    <string name="nav_menu_about">About</string>
+    <string name="nav_header_communicate">Communicate</string>
+    <string name="nav_menu_saved">Saved</string>
+    <string name="detail_set_wallpaper">Set Wallpaper</string>
+    <string name="recent_searches">Recent searches:</string>
+    <string name="temp_3d_wallpapers">3d wallpapers</string>
 
 </resources>

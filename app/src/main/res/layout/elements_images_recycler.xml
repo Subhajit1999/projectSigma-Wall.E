@@ -3,7 +3,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="5dp"
-    app:cardElevation="2dp"
+    app:cardElevation="10dp"
     android:layout_margin="5dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -14,5 +14,5 @@
         android:src="@drawable/circle_icon"
         app:riv_corner_radius="5dp"
         android:scaleType="center"
-        android:layout_margin="5dp" />
+         />
     </androidx.cardview.widget.CardView>

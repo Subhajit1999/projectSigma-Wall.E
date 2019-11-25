@@ -45,6 +45,9 @@ public class HomeFragment extends Fragment implements RecyclerAdapter.OnItemClic
 
         mRecyclerView = view.findViewById(R.id.category_list);
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setItemViewCacheSize(20);
+        mRecyclerView.setDrawingCacheEnabled(true);
+        mRecyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(),RecyclerView.VERTICAL,false);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -64,13 +67,21 @@ public class HomeFragment extends Fragment implements RecyclerAdapter.OnItemClic
         StaticUtils.categoryList = new ArrayList<>();
         StaticUtils.categoryList.add(new CategoryItem(R.drawable.featured,"Featured"));
         StaticUtils.categoryList.add(new CategoryItem(R.drawable.abstruct,"Abstract"));
-        StaticUtils.categoryList.add(new CategoryItem(R.drawable.foods,"Foods"));
-        StaticUtils.categoryList.add(new CategoryItem(R.drawable.cars,"Cars"));
-        StaticUtils.categoryList.add(new CategoryItem(R.drawable.nature,"Nature"));
-        StaticUtils.categoryList.add(new CategoryItem(R.drawable.girls,"Girls"));
-        StaticUtils.categoryList.add(new CategoryItem(R.drawable.technology,"Technology"));
-        StaticUtils.categoryList.add(new CategoryItem(R.drawable.religious,"Religious"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.army,"Army"));
         StaticUtils.categoryList.add(new CategoryItem(R.drawable.baby,"Baby"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.beach,"Beach"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.cars,"Cars"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.city,"City"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.foods,"Foods"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.girls,"Girls"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.macro,"Macro"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.nature,"Nature"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.religious,"Religious"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.sports,"Sports"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.stars,"Stars"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.technology,"Technology"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.water,"Water"));
+        StaticUtils.categoryList.add(new CategoryItem(R.drawable.wildlife,"Wildlife"));
     }
 
     @Override
@@ -80,9 +91,9 @@ public class HomeFragment extends Fragment implements RecyclerAdapter.OnItemClic
 
         if(network.checkConnection()){      //if network connected
             Intent i = new Intent(getActivity(), SecondActivity.class);
-            i.putExtra("FRAG_CATEGORY_ITEMS",0);
+            i.putExtra(StaticUtils.KEY_FRAG_ID,0);
             if (position!=0){
-                i.putExtra("KEY_SEARCH_TERM",StaticUtils.categoryList.get(position).getmTitle().toLowerCase());
+                i.putExtra(StaticUtils.KEY_SEARCH_DATA,StaticUtils.categoryList.get(position).getmTitle());
             }
             startActivity(i);
         }

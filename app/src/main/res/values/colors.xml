@@ -2,7 +2,10 @@
 <resources>
     <color name="colorPrimary">#fff</color>
     <color name="colorPrimaryDark">#ccc</color>
-    <color name="colorAccent">#707070</color>
+    <color name="colorAccent">#505050</color>
 
+    <!--custom colors-->
     <color name="lightBack">#E09653</color>
+    <color name="purple">#7434eb</color>
+    <color name="grey">#D4D4D4</color>
 </resources>

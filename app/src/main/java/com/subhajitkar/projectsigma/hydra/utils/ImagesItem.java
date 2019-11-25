@@ -6,46 +6,36 @@ public class ImagesItem {
     private static final String TAG = "ImagesItem";
 
     private int mImageId;
-    private String mImageUrl, mSrcName, mSrcUrl;
+    private String mSrcName, mSrcUrl, mDimen;
+    private ImageDifferentSize mImagesArray;
 
-    public ImagesItem(int imageId, String imageUrl, String srcName, String srcUrl){
+    public ImagesItem(int imageId, String srcName, String dimen, String srcUrl,ImageDifferentSize imagesArray){
         Log.d(TAG, "ImagesItem: constructor");
 
         mImageId = imageId;
-        mImageUrl = imageUrl;
         mSrcName = srcName;
         mSrcUrl = srcUrl;
+        mImagesArray = imagesArray;
+        mDimen = dimen;
     }
 
-    public void setmImageId(int mImageId) {
-        this.mImageId = mImageId;
+    public String getmDimen() {
+        return mDimen;
     }
 
     public int getmImageId() {
         return mImageId;
     }
 
-    public void setmSrcName(String mSrcName) {
-        this.mSrcName = mSrcName;
-    }
-
     public String getmSrcName() {
         return mSrcName;
-    }
-
-    public void setmSrcUrl(String mSrcUrl) {
-        this.mSrcUrl = mSrcUrl;
     }
 
     public String getmSrcUrl() {
         return mSrcUrl;
     }
 
-    public String getmImageUrl() {
-        return mImageUrl;
-    }
-
-    public void setmImageUrl(String mImageUrl) {
-        this.mImageUrl = mImageUrl;
+    public ImageDifferentSize getmImagesArray() {
+        return mImagesArray;
     }
 }
