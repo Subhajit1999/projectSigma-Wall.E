@@ -32,6 +32,7 @@
     <string name="image_size_portrait">Portrait</string>
     <string name="image_size_landscape">Landscape</string>
     <string name="image_size_tiny">Tiny</string>
+    <string name="about_app_desc">, is a wallpaper application, powered by \"pexels.com\" API, made for android devices to make the task of finding beautiful wallpapers very easy.\n This app provides endless photos through the Pexels API, shared by talented creators across the globe.</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -43,5 +44,6 @@
     <string name="detail_set_wallpaper">Set Wallpaper</string>
     <string name="recent_searches">Recent searches:</string>
     <string name="temp_3d_wallpapers">3d wallpapers</string>
+    <string name="text_unsave">Unsave</string>
 
 </resources>

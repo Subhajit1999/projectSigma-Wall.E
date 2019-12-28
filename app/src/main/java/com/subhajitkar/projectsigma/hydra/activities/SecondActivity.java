@@ -3,8 +3,10 @@ package com.subhajitkar.projectsigma.hydra.activities;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -22,7 +24,11 @@ import androidx.appcompat.widget.Toolbar;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.subhajitkar.projectsigma.hydra.R;
+import com.subhajitkar.projectsigma.hydra.fragments.AboutFragment;
 import com.subhajitkar.projectsigma.hydra.fragments.ImagesFragment;
 import com.subhajitkar.projectsigma.hydra.utils.ImageDifferentSize;
 import com.subhajitkar.projectsigma.hydra.utils.ImagesItem;
@@ -34,7 +40,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -51,7 +62,6 @@ public class SecondActivity extends AppCompatActivity {
     private int frag_id;
     public static String search_term;
     private Toolbar toolbar;
-    private Context mContext = SecondActivity.this;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,9 +69,16 @@ public class SecondActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: creating the layout");
         setContentView(R.layout.activity_second);
 
-        StaticUtils.imagesList = new ArrayList<>();
-
         getIntentData();  //receiving intent data
+
+        if (frag_id!=3 && frag_id!=4) {     //if not about fragment and downloads
+            StaticUtils.imagesList = new ArrayList<>();
+            //restoring saved searches list
+            StaticUtils.savedImagesList = getBookmarkArraylist(getApplicationContext());
+            if (StaticUtils.savedImagesList == null) {
+                StaticUtils.savedImagesList = new ArrayList<>();
+            }
+        }
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -85,8 +102,19 @@ public class SecondActivity extends AppCompatActivity {
                 onSupportNavigateUp();
             }
         });
-        getSupportFragmentManager().beginTransaction().replace(R.id.second_fragment_container,
-                    new ImagesFragment()).commit();
+            if (frag_id!=3) {  //not about fragment
+                ImagesFragment fragment = new ImagesFragment();
+                if (frag_id == 2||frag_id==4) {  //if saved or downloads
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(StaticUtils.KEY_SAVED_FRAG_ID, frag_id);
+                    fragment.setArguments(bundle);
+                }
+                getSupportFragmentManager().beginTransaction().replace(R.id.second_fragment_container,
+                        fragment).commit();
+            }else{
+                getSupportFragmentManager().beginTransaction().replace(R.id.second_fragment_container,
+                        new AboutFragment()).commit();
+            }
     }
 
     private void getIntentData(){
@@ -95,14 +123,17 @@ public class SecondActivity extends AppCompatActivity {
         Intent intent = getIntent();
         frag_id = intent.getIntExtra(StaticUtils.KEY_FRAG_ID,0);
         search_term = intent.getStringExtra(StaticUtils.KEY_SEARCH_DATA);
-        if (search_term==null){
-            urlImage = "https://api.pexels.com/v1/curated?per_page=30";
-        }else{
-            int randPage;
-            do{
-                randPage = new Random().nextInt(20);
-            }while(randPage==0);
-            urlImage = "https://api.pexels.com/v1/search?query="+search_term.toLowerCase()+"&per_page=30&page="+randPage;
+        if (frag_id==0 || frag_id==1) {  //if home fragment & search fragment
+            Log.d(TAG, "getIntentData: frag id not 2");
+            if (search_term == null) {
+                urlImage = "https://api.pexels.com/v1/curated?per_page=30";
+            } else {
+                int randPage;
+                do {
+                    randPage = new Random().nextInt(20);
+                }while(randPage==0);
+                urlImage = "https://api.pexels.com/v1/search?query=" + search_term.toLowerCase() + "&per_page=30&page=" + randPage;
+            }
         }
     }
 
@@ -185,5 +216,46 @@ public class SecondActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    public void saveBookmarkArraylist(Context mContext, ArrayList<ImagesItem> list) {
+        Log.d(TAG, "saveBookmarkArraylist: saving the saved arraylist");
+
+        SharedPreferences preferences;
+        SharedPreferences.Editor editor;
+        preferences = mContext.getSharedPreferences(TAG, Context.MODE_PRIVATE);
+        editor = preferences.edit();
+        Gson gson = new Gson();
+        String jsonFavorites = gson.toJson(list);
+        editor.putString(StaticUtils.KEY_SAVED_PREFERENCES, jsonFavorites);
+        editor.commit();
+    }
+
+    public ArrayList getBookmarkArraylist(Context context) {
+        Log.d(TAG, "getBookmarkArraylist: getting the arraylist");
+        SharedPreferences preferences;
+        ArrayList<ImagesItem> saved = new ArrayList<>();
+
+        preferences = context.getSharedPreferences(TAG, Context.MODE_PRIVATE);
+
+        if (preferences.contains(StaticUtils.KEY_SAVED_PREFERENCES)) {
+            String jsonFavorites = preferences.getString(StaticUtils.KEY_SAVED_PREFERENCES, null);
+            Gson gson = new Gson();
+            ImagesItem[] favoriteItems = gson.fromJson(jsonFavorites,
+                    ImagesItem[].class);
+
+            Collections.addAll(saved,favoriteItems);
+        } else
+            return null;
+
+        return (ArrayList<ImagesItem>) saved;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (frag_id!=3 && frag_id!=4) {
+            saveBookmarkArraylist(getApplicationContext(), StaticUtils.savedImagesList);
+        }
     }
 }

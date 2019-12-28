@@ -70,10 +70,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
 
         //category recycler
         if (mRecyclerId==0){
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-//                Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(),mCategoryList.get(i).getmImage());
-//                Glide.with(mContext).load(new BlurBuilder().blur(mContext,bitmap)).into(holder.mCategoryImage);
-//            }
             Glide.with(mContext).load(mCategoryList.get(i).getmImage()).into(holder.mCategoryImage);
             holder.mCategoryText.setText(mCategoryList.get(i).getmTitle());
 
@@ -100,37 +96,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
         }
     }
 
-    private class BlurBuilder {
-        private static final float BITMAP_SCALE = 0.5f;
-        private static final float BLUR_RADIUS = 7.5f;
-
-        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-        private Bitmap blur(Context context, Bitmap image) {
-            int width = Math.round(image.getWidth() * BITMAP_SCALE);
-            int height = Math.round(image.getHeight() * BITMAP_SCALE);
-
-            Bitmap inputBitmap = Bitmap.createScaledBitmap(image, width, height, false);
-            Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
-
-            RenderScript rs = RenderScript.create(context);
-            ScriptIntrinsicBlur theIntrinsic = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-            Allocation tmpIn = Allocation.createFromBitmap(rs, inputBitmap);
-            Allocation tmpOut = Allocation.createFromBitmap(rs, outputBitmap);
-            theIntrinsic.setRadius(BLUR_RADIUS);
-            theIntrinsic.setInput(tmpIn);
-            theIntrinsic.forEach(tmpOut);
-            tmpOut.copyTo(outputBitmap);
-
-            return outputBitmap;
-        }
-    }
-
     class RecyclerViewHolder extends RecyclerView.ViewHolder{
 
         ImageView mCategoryImage;
         RoundedImageView mImage;
         TextView mCategoryText;
-        RelativeLayout rootView;
 
         private RecyclerViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -139,7 +109,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
             if (mRecyclerId==0){
                 mCategoryImage = itemView.findViewById(R.id.iv_category);
                 mCategoryText = itemView.findViewById(R.id.tv_category);
-                rootView = itemView.findViewById(R.id.layout_category);
             }else{
                 mImage = itemView.findViewById(R.id.iv_wall);
             }

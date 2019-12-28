@@ -24,8 +24,11 @@ public class StaticUtils {
             Manifest.permission.SET_WALLPAPER
     };
     public static ArrayList<String> recentSearchesList;
+    public static ArrayList<ImagesItem> savedImagesList;
+    public static final String KEY_SAVED_PREFERENCES = "KEY_SAVED_PREFERENCES#36497";
     public static final String KEY_FRAG_ID = "KEY_FRAG_IDENTIFIER#98655";
     public static final String KEY_SEARCH_DATA = "KEY_SEARCH_TEXT_DATA#84788";
     public static final String NETWORK_ERROR_MESSAGE = "Oops! No Internet connection. Check & try again.";
     public static final String KEY_LIST_PREFERENCCES = "KEY_RECENT_SEARCH_LIST_PREFERENCCES#29925";
+    public static final String KEY_SAVED_FRAG_ID = "KEY_SAVED_FRAG_ID#87348";
 }

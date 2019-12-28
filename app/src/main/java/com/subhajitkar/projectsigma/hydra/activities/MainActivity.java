@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.android.volley.RequestQueue;
@@ -29,6 +30,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.subhajitkar.projectsigma.hydra.R;
 import com.subhajitkar.projectsigma.hydra.fragments.HomeFragment;
+import com.subhajitkar.projectsigma.hydra.fragments.ImagesFragment;
 import com.subhajitkar.projectsigma.hydra.fragments.SearchFragment;
 import com.subhajitkar.projectsigma.hydra.utils.NetworkUtils;
 import com.subhajitkar.projectsigma.hydra.utils.StaticUtils;
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity
         if (StaticUtils.recentSearchesList==null){
             StaticUtils.recentSearchesList = new ArrayList<>();
         }
+        StaticUtils.savedImagesList = new ArrayList<>();
         searchBar = findViewById(R.id.searchToolBar);
         searchBar.setHint("Search Wallpapers");
         searchBar.setOnSearchActionListener(this);
@@ -113,11 +116,51 @@ public class MainActivity extends AppCompatActivity
                     new HomeFragment()).commit();
 
         } else if (id == R.id.nav_saved) {
+            NetworkUtils network = new NetworkUtils(this);
+            if(network.checkConnection()){      //if network connected
+                Intent i = new Intent(MainActivity.this, SecondActivity.class);
+                i.putExtra(StaticUtils.KEY_FRAG_ID,2);
+                i.putExtra(StaticUtils.KEY_SEARCH_DATA,"Saved");
+                startActivity(i);
+            }
+
+        }else if (id == R.id.nav_downloads) {
+//            //downloaded images
+//            Intent i = new Intent(MainActivity.this, SecondActivity.class);
+//            i.putExtra(StaticUtils.KEY_FRAG_ID,4);  //4 for downloads section
+//            i.putExtra(StaticUtils.KEY_SEARCH_DATA,"Downloads");
+//            startActivity(i);
 
         } else if (id == R.id.nav_share) {
+            //share the app intent
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey! look what I found from play store.\nDownload cool & amazing wallpapers for your device from this app, "+getResources().getString(R.string.app_name)+", among various categories.\n\nCheck this out:\nhttps://play.google.com/store/apps/details?id="+getPackageName()+"\nDownload now:)");
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, "Share app through..."));
+
+        } else if (id == R.id.nav_rate) {
+            //rate the app intent
+            Uri uri = Uri.parse("market://details?id=" + getApplicationContext().getPackageName());
+            Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+            // To count with Play market backstack, After pressing back button,
+            // to taken back to our application, we need to add following flags to intent.
+            goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                    Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            try {
+                startActivity(goToMarket);
+            } catch (Exception e) {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("http://play.google.com/store/apps/details?id=" + getApplicationContext().getPackageName())));
+            }
 
         } else if (id == R.id.nav_about) {
-
+            //about page
+            Intent i = new Intent(MainActivity.this, SecondActivity.class);
+            i.putExtra(StaticUtils.KEY_FRAG_ID,3);  //3 for about fragment
+            i.putExtra(StaticUtils.KEY_SEARCH_DATA,"About");
+            startActivity(i);
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -218,6 +261,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void searchEvents(){
+        Log.d(TAG, "searchEvents: managing the search events");
         searchBar.addTextChangeListener(new TextWatcher() {
             ArrayList<String> tempList = new ArrayList<>();
             @Override
@@ -248,5 +292,11 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        navigationView.setCheckedItem(R.id.nav_home);
     }
 }

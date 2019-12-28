@@ -12,6 +12,10 @@
             android:id="@+id/nav_saved"
             android:icon="@drawable/ic_menu_saved"
             android:title="@string/nav_menu_saved" />
+        <item
+            android:id="@+id/nav_downloads"
+            android:icon="@drawable/ic_menu_downloads"
+            android:title="Downloads" />
     </group>
 
     <item android:title="@string/nav_header_communicate">
@@ -20,6 +24,10 @@
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
                 android:title="@string/menu_share" />
+            <item
+                android:id="@+id/nav_rate"
+                android:icon="@drawable/ic_menu_rate"
+                android:title="Rate app" />
             <item
                 android:id="@+id/nav_about"
                 android:icon="@drawable/ic_menu_about"

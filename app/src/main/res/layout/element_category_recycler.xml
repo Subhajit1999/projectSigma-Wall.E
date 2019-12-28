@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,13 +13,16 @@
         android:layout_height="90dp"
         android:id="@+id/iv_category"
         android:src="@drawable/featured"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_margin="5dp"
         android:scaleType="centerCrop"
-        app:riv_corner_radius="20dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        app:riv_corner_radius="20dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:background="@drawable/gradient_bg" >
+    </FrameLayout>
 
     <TextView
         android:id="@+id/tv_category"
@@ -29,7 +32,7 @@
         android:textColor="#FFFFFF"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:layout_marginStart="30dp"
-        android:layout_centerVertical="true"
         android:layout_marginLeft="50dp" />
-</RelativeLayout>
+</FrameLayout>

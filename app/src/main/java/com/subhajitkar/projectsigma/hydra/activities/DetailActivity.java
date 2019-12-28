@@ -48,6 +48,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import com.subhajitkar.projectsigma.hydra.R;
+import com.subhajitkar.projectsigma.hydra.fragments.ImagesFragment;
 import com.subhajitkar.projectsigma.hydra.utils.ImageDifferentSize;
 import com.subhajitkar.projectsigma.hydra.utils.ImagesItem;
 import com.subhajitkar.projectsigma.hydra.utils.RecyclerAdapter;
@@ -81,26 +82,33 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
 
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
-    private Boolean appBarExpanded;
+    private boolean appBarExpanded,saved=false;
     private Context mContext = DetailActivity.this;
-    private ImageView imageView,pexels;
-    private int imagePos,listId;
+    private ImageView imageView,pexels,saveIcon;
+    private int imagePos,listId,fragId;
     private String urlRecommended,search_term,File_Name,dimen;
     private RecyclerAdapter adapter;
     private CoordinatorLayout coordinatorLayout;
     private BroadcastReceiver broadcastReceiver;
-    private TextView photographer;
-    private ImageDifferentSize image;
+    private TextView photographer,saveText;
+    private ImagesItem image;
     private File imageDirect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: gets called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
         StaticUtils.recommendedImagesList = new ArrayList<>();  //initializing the arraylist
         //setting up to get the data
-        search_term = getIntent().getStringExtra(StaticUtils.KEY_SEARCH_TERM);
+        fragId = getIntent().getIntExtra(StaticUtils.KEY_SAVED_FRAG_ID,0);
+        if (fragId != 2) {
+            search_term = getIntent().getStringExtra(StaticUtils.KEY_SEARCH_TERM);
+        }else{
+            int randInt = new Random().nextInt(16);
+            search_term = StaticUtils.categoryList.get(randInt).getmTitle();
+        }
         checkNetworkAvailabilty(search_term);
         coordinatorLayout = findViewById(R.id.root_coordinator);
         photographer = findViewById(R.id.textAttrPhotographer);
@@ -110,25 +118,35 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         setupToolBar();
         //setting up the image
         imagePos = getIntent().getIntExtra(StaticUtils.KEY_CLICKED_IMAGE,0);
-        listId = 0;
-        image = StaticUtils.imagesList.get(imagePos).getmImagesArray();
-        loadImage(image.getmLarge());
-        File_Name = URLUtil.guessFileName(image.getmOriginal(),null,null);
+        if (fragId != 2) {
+            listId = 0;
+            image = StaticUtils.imagesList.get(imagePos);
+        }else{
+            listId = fragId;
+            image = StaticUtils.savedImagesList.get(imagePos);
+        }
+        loadImage(image.getmImagesArray().getmLarge());
+        File_Name = URLUtil.guessFileName(image.getmImagesArray().getmOriginal(),null,null);
         setupRecycler();
         funcUrl(listId); //0 indicates the default imageslist from imagesFragment
         shareIntent();  //0 for default list
         manageDownload();
+        manageSaveUnsave();
         //setWallpaper();
     }
 
     public void funcUrl(int identifier){
+        Log.d(TAG, "funcUrl: setting up the urls");
         final String srcName,srcUrl;
         if (identifier==0){
             srcName = StaticUtils.imagesList.get(imagePos).getmSrcName();
             srcUrl = StaticUtils.imagesList.get(imagePos).getmSrcUrl();
-        }else{
+        }else if(identifier==1){
             srcName = StaticUtils.recommendedImagesList.get(imagePos).getmSrcName();
             srcUrl = StaticUtils.recommendedImagesList.get(imagePos).getmSrcUrl();
+        }else{
+            srcName = StaticUtils.savedImagesList.get(imagePos).getmSrcName();
+            srcUrl = StaticUtils.savedImagesList.get(imagePos).getmSrcUrl();
         }
         photographer.setText(srcName);
         photographer.setOnClickListener(new View.OnClickListener() {
@@ -226,25 +244,25 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
 
         switch (item.getItemId()){
             case R.id.original:
-                url = image.getmOriginal();
+                url = image.getmImagesArray().getmOriginal();
                 break;
             case R.id.large:
-                url = image.getmLarge();
+                url = image.getmImagesArray().getmLarge();
                 break;
             case R.id.medium:
-                url = image.getmMedium();
+                url = image.getmImagesArray().getmMedium();
                 break;
             case R.id.small:
-                url = image.getmSmall();
+                url = image.getmImagesArray().getmSmall();
                 break;
             case R.id.portrait:
-                url = image.getmPortrait();
+                url = image.getmImagesArray().getmPortrait();
                 break;
             case R.id.landscape:
-                url = image.getmLandscape();
+                url = image.getmImagesArray().getmLandscape();
                 break;
             case R.id.tiny:
-                url = image.getmTiny();
+                url = image.getmImagesArray().getmTiny();
                 break;
         }
         loadImage(url);
@@ -400,11 +418,16 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         Log.d(TAG, "onItemClick: clicking from recommended image list");
         listId = 1;
         imagePos = position;
-        image = StaticUtils.recommendedImagesList.get(position).getmImagesArray();
-        loadImage(image.getmLarge());
-        File_Name = URLUtil.guessFileName(image.getmOriginal(),null,null);
+        image = StaticUtils.recommendedImagesList.get(position);
+        loadImage(image.getmImagesArray().getmLarge());
+        File_Name = URLUtil.guessFileName(image.getmImagesArray().getmOriginal(),null,null);
         appBarLayout.setExpanded(true,true);
         funcUrl(listId);
+        if (!isImageSaved()) {  //if image doesn't exist in the saved list
+            saved = false;
+            saveIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_save_unchecked));
+            saveText.setText(getResources().getString(R.string.detail_save));
+        }
         checkNetworkAvailabilty(search_term);
     }
 
@@ -418,7 +441,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
                 String imageUrl;
-                imageUrl = image.getmOriginal();
+                imageUrl = image.getmImagesArray().getmOriginal();
                 sendIntent.putExtra(Intent.EXTRA_TEXT, "I found this amazing wallpaper from Wall.e, an wallpaper android app powered by pexels.com.\n\nDownload the wallpaper now from here-(link-"+imageUrl+")\n\nDownload Wall.e for more amazing wallpapers from Play Store.");
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, "Share the image..."));
@@ -451,8 +474,10 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         builder.setIcon(getResources().getDrawable(R.drawable.ic_dialog_download));
         if (listId==0){
             dimen = StaticUtils.imagesList.get(imagePos).getmDimen();
-        }else{
+        }else if (listId==1){
             dimen = StaticUtils.recommendedImagesList.get(imagePos).getmDimen();
+        }else {
+            dimen = StaticUtils.savedImagesList.get(imagePos).getmDimen();
         }
         final List<String> downloadSize = new ArrayList<>();
         downloadSize.add("Original  ("+dimen+")");
@@ -473,25 +498,25 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
                 String url="";
                 switch(which){
                     case 0:
-                        url = image.getmOriginal();
+                        url = image.getmImagesArray().getmOriginal();
                         break;
                     case 1:
-                        url = image.getmLarge();
+                        url = image.getmImagesArray().getmLarge();
                         break;
                     case 2:
-                        url = image.getmMedium();
+                        url = image.getmImagesArray().getmMedium();
                         break;
                     case 3:
-                        url = image.getmSmall();
+                        url = image.getmImagesArray().getmSmall();
                         break;
                     case 4:
-                        url = image.getmPortrait();
+                        url = image.getmImagesArray().getmPortrait();
                         break;
                     case 5:
-                        url = image.getmLandscape();
+                        url = image.getmImagesArray().getmLandscape();
                         break;
                     case 6:
-                        url = image.getmTiny();
+                        url = image.getmImagesArray().getmTiny();
                 }
                 downloadImage(url);
             }
@@ -523,15 +548,13 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.d(TAG, "onRequestPermissionsResult: action when permission granted or denied");
-        switch (requestCode) {
-            case StaticUtils.MULTIPLE_PERMISSIONS:{
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    // permissions granted.
-                    downloadDialog();
-                } else {
-                    // no permissions granted.
-                    showPermissionDialog();
-                }
+        if (requestCode == StaticUtils.MULTIPLE_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // permissions granted.
+                downloadDialog();
+            } else {
+                // no permissions granted.
+                showPermissionDialog();
             }
         }
     }
@@ -594,6 +617,61 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             e.printStackTrace();
         }
     }
+    public boolean isImageSaved(){
+        Log.d(TAG, "isImageSaved: checking if image is saved or not");
+        for (ImagesItem item: StaticUtils.savedImagesList) {
+            if (item.getmImagesArray().getmOriginal().matches("(?i)(" + image.getmImagesArray().getmOriginal() + ").*")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void manageSaveUnsave(){
+        Log.d(TAG, "manageSaveUnsave: implementing save and unsave feature");
+        LinearLayout saveUnsave = findViewById(R.id.linear_detail_save);
+        saveIcon = findViewById(R.id.iv_detail_save);
+        saveText = findViewById(R.id.tv_detail_save);
+
+        if (isImageSaved()) {
+            saved = true;
+            saveIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_save_checked));
+            saveText.setText(getResources().getString(R.string.text_unsave));
+        }
+        saveUnsave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //save layout click action
+                if(saved){  //if image exists in the list
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("Warning:");
+                    builder.setIcon(getResources().getDrawable(R.drawable.ic_dialog_download));
+                    builder.setMessage("Are you sure you want to delete the image from the saved list?");
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            StaticUtils.savedImagesList.remove(image);
+                            saveIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_save_unchecked));
+                            saveText.setText(getResources().getString(R.string.detail_save));
+                            saved = false;
+                            Snackbar.make(coordinatorLayout,"Wallpaper removed from the saved list.",Snackbar.LENGTH_SHORT).show();
+                        }
+                    });
+                    builder.setNegativeButton("No",null);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
+                }else{  //if doesn't exist
+                    StaticUtils.savedImagesList.add(image);
+                    saveIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_save_checked));
+                    saveText.setText(getResources().getString(R.string.text_unsave));
+                    saved = true;
+                    Snackbar.make(coordinatorLayout,"Wallpaper added to the saved list.",Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
 
     public void setWallpaper(){
         Log.d(TAG, "setWallpaper: setting wallpaper");
@@ -602,7 +680,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             @Override
             public void onClick(View v) {
                 if (listId==0){
-                    image = StaticUtils.imagesList.get(imagePos).getmImagesArray();
+                    image = StaticUtils.imagesList.get(imagePos);
                 }else{
                     //image = clickedImageRecom;
                 }
@@ -646,6 +724,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
 //    }
 
     public String getFileFullPath(String fileName) {
+        Log.d(TAG, "getFileFullPath: getting the full file path");
         try {
 
             if (fileName != null && !fileName.isEmpty()) {
