@@ -32,9 +32,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -45,6 +48,8 @@ import android.widget.Toast;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.snackbar.Snackbar;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import com.subhajitkar.projectsigma.hydra.R;
@@ -84,15 +89,18 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
     private Toolbar toolbar;
     private boolean appBarExpanded,saved=false;
     private Context mContext = DetailActivity.this;
-    private ImageView imageView,pexels,saveIcon;
+    private ImageView pexels,saveIcon;
+    private ImageView imageView;
     private int imagePos,listId,fragId;
-    private String urlRecommended,search_term,File_Name,dimen;
+    private String urlRecommended,search_term,File_Name,dimen,imageUrl;
     private RecyclerAdapter adapter;
     private CoordinatorLayout coordinatorLayout;
     private BroadcastReceiver broadcastReceiver;
     private TextView photographer,saveText;
     private ImagesItem image;
     private File imageDirect;
+    private Bitmap downloadedBitmap;
+    private int orientation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,39 +108,46 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        StaticUtils.recommendedImagesList = new ArrayList<>();  //initializing the arraylist
-        //setting up to get the data
-        fragId = getIntent().getIntExtra(StaticUtils.KEY_SAVED_FRAG_ID,0);
-        if (fragId != 2) {
-            search_term = getIntent().getStringExtra(StaticUtils.KEY_SEARCH_TERM);
-        }else{
-            int randInt = new Random().nextInt(16);
-            search_term = StaticUtils.categoryList.get(randInt).getmTitle();
-        }
-        checkNetworkAvailabilty(search_term);
-        coordinatorLayout = findViewById(R.id.root_coordinator);
-        photographer = findViewById(R.id.textAttrPhotographer);
-        pexels = findViewById(R.id.roundedPexels);
+            StaticUtils.recommendedImagesList = new ArrayList<>();  //initializing the arraylist
+            //setting up to get the data
+            fragId = getIntent().getIntExtra(StaticUtils.KEY_SAVED_FRAG_ID, 0);
+            if (fragId != 2) {
+                search_term = getIntent().getStringExtra(StaticUtils.KEY_SEARCH_TERM);
+            } else {
+                int randInt = new Random().nextInt(16);
+                search_term = StaticUtils.categoryList.get(randInt).getmTitle();
+            }
+            checkNetworkAvailabilty(search_term);
+            coordinatorLayout = findViewById(R.id.root_coordinator);
+            photographer = findViewById(R.id.textAttrPhotographer);
+            pexels = findViewById(R.id.roundedPexels);
 
-        setUpAppBar();
-        setupToolBar();
-        //setting up the image
-        imagePos = getIntent().getIntExtra(StaticUtils.KEY_CLICKED_IMAGE,0);
-        if (fragId != 2) {
-            listId = 0;
-            image = StaticUtils.imagesList.get(imagePos);
-        }else{
-            listId = fragId;
-            image = StaticUtils.savedImagesList.get(imagePos);
-        }
-        loadImage(image.getmImagesArray().getmLarge());
-        File_Name = URLUtil.guessFileName(image.getmImagesArray().getmOriginal(),null,null);
-        setupRecycler();
-        funcUrl(listId); //0 indicates the default imageslist from imagesFragment
-        shareIntent();  //0 for default list
-        manageDownload();
-        manageSaveUnsave();
-        //setWallpaper();
+            setUpAppBar();
+            setupToolBar();
+            //setting up the image
+            imagePos = getIntent().getIntExtra(StaticUtils.KEY_CLICKED_IMAGE, 0);
+            if (fragId != 2) {
+                listId = 0;
+                image = StaticUtils.imagesList.get(imagePos);
+            } else {
+                listId = fragId;
+                image = StaticUtils.savedImagesList.get(imagePos);
+            }
+            //setting image based on orientation
+            orientation = getResources().getConfiguration().orientation;
+            if (orientation==1) {
+                imageUrl = image.getmImagesArray().getmPortrait();
+            }else{
+                imageUrl = image.getmImagesArray().getmLandscape();
+            }
+            loadImage(imageUrl);
+            File_Name = URLUtil.guessFileName(image.getmImagesArray().getmOriginal(), null, null);
+            setupRecycler();
+            funcUrl(listId); //0 indicates the default imageslist from imagesFragment
+            shareIntent();  //0 for default list
+            manageDownload();
+            manageSaveUnsave();
+            setWallpaper();
     }
 
     public void funcUrl(int identifier){
@@ -153,26 +168,20 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             @Override
             public void onClick(View v) {
                 //opens the photographer profile on pexels
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(srcUrl));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    startActivity(Intent.createChooser(i,"Open link with..."));
-                }else{
-                    startActivity(i);
-                }
+                Intent i = new Intent(DetailActivity.this,GeneralActivity.class);
+                i.putExtra(StaticUtils.KEY_INTENT_GENERAL,"webView");
+                i.putExtra(StaticUtils.KEY_WEBURL,srcUrl);
+                startActivity(i);
             }
         });
         pexels.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //opens the url www.pexels.com/
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse("https://www.pexels.com/"));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    startActivity(Intent.createChooser(i,"Open link with...",null));
-                }else{
-                    startActivity(i);
-                }
+                Intent i = new Intent(DetailActivity.this,GeneralActivity.class);
+                i.putExtra(StaticUtils.KEY_INTENT_GENERAL,"webView");
+                i.putExtra(StaticUtils.KEY_WEBURL,"http://www.pexels.com");
+                startActivity(i);
             }
         });
     }
@@ -269,10 +278,31 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         return true;
     }
 
-    public void loadImage(String imageUrl){
+    public void loadImage(final String imageUrl){
         Log.d(TAG, "loadImage: loading image");
-
         imageView = findViewById(R.id.expandedImage);
+
+        Target target = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                Log.d(TAG, "onBitmapLoaded: image loaded");
+                imageView.setImageBitmap(bitmap);
+                downloadedBitmap = bitmap;
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                Log.d(TAG, "onBitmapFailed: image load error");
+//                        imageView.setImageDrawable(errorDrawable);
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                Log.d(TAG, "onPrepareLoad: image loading");
+//                        imageView.setImageDrawable(getResources().getDrawable(R.drawable.circle_icon));
+            }
+        };
+        imageView.setTag(target);
 
         Snackbar.make(coordinatorLayout,"Loading image...",Snackbar.LENGTH_SHORT).show();
         Picasso.with(mContext)
@@ -280,7 +310,35 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
                 .placeholder(R.drawable.circle_icon)
                 .centerInside()
                 .resize(1000,1000)
-                .into(imageView);
+                .into(target);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //imageView click action
+                Log.d(TAG, "onClick: imageView clicked");
+                ImageView mImage = new ImageView(getApplicationContext());
+                if (downloadedBitmap!=null) {
+                    mImage.setImageBitmap(downloadedBitmap);
+                }else{
+                    mImage.setImageDrawable(getResources().getDrawable(R.drawable.circle_icon));
+                }
+                displayFullImage(mImage);
+            }
+        });
+    }
+
+    private void displayFullImage(ImageView image) {
+        Log.d(TAG, "displayFullImage: showing image preview dialog");
+
+        final AlertDialog.Builder imageDialog = new AlertDialog.Builder(this);
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        View layout = inflater.inflate(R.layout.display_image_fullscreen,
+                (ViewGroup) findViewById(R.id.llFullImage));
+        ImageView imageView = (ImageView) layout.findViewById(R.id.iv_fullscreen);
+        imageView.setImageDrawable(image.getDrawable());
+        imageDialog.setView(layout);
+        imageDialog.create().show();
     }
 
     public void setupRecycler(){
@@ -578,7 +636,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
     }
 
     public void downloadImage(String ImageUrl){
-        Log.d(TAG, "downloadImage: downloaing image. ImageUrl: "+ImageUrl);
+        Log.d(TAG, "downloadImage: downloading image. ImageUrl: "+ImageUrl);
 
         Picasso.with(mContext)
                 .load(ImageUrl)
@@ -617,6 +675,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             e.printStackTrace();
         }
     }
+
     public boolean isImageSaved(){
         Log.d(TAG, "isImageSaved: checking if image is saved or not");
         for (ImagesItem item: StaticUtils.savedImagesList) {
@@ -679,30 +738,12 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         linear_setWall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (listId==0){
-                    image = StaticUtils.imagesList.get(imagePos);
-                }else{
-                    //image = clickedImageRecom;
-                }
-                if ((getResources().getConfiguration().screenLayout &
-                        Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE||
-                        (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
-                    // on a large screen device ...
-                    //new DownloadImage().execute(image.getmOriginal());
-                }else{
-                    //new DownloadImage().execute(image.getmPortrait());
-                }
-                try {
-                    WallpaperManager wallpaperManager = WallpaperManager.getInstance(mContext);
-                    //File myImageFile = new File(getFileFullPath(File_Name));
-                    Bitmap bitmap = BitmapFactory.decodeFile(getFileFullPath(File_Name));
-                    if (bitmap!=null){
-                        wallpaperManager.setBitmap(bitmap);
-                    }else{
-                        Snackbar.make(coordinatorLayout,"Sorry! Cannot set wallpaper.",Snackbar.LENGTH_SHORT).show();
-                    }
-
-                } catch (IOException e) {
+                //setting wallpaper
+                WallpaperManager manager = WallpaperManager.getInstance(getApplicationContext());
+                try{
+                    manager.setBitmap(downloadedBitmap);
+                    Snackbar.make(coordinatorLayout,"Wallpaper set successfully.",Snackbar.LENGTH_SHORT).show();
+                }catch (IOException e){
                     e.printStackTrace();
                 }
             }

@@ -31,4 +31,6 @@ public class StaticUtils {
     public static final String NETWORK_ERROR_MESSAGE = "Oops! No Internet connection. Check & try again.";
     public static final String KEY_LIST_PREFERENCCES = "KEY_RECENT_SEARCH_LIST_PREFERENCCES#29925";
     public static final String KEY_SAVED_FRAG_ID = "KEY_SAVED_FRAG_ID#87348";
+    public static final String KEY_WEBURL = "KEY_WEBURL_GENERAL#97535";
+    public static final String KEY_INTENT_GENERAL = "KEY_INTENT_GENERAL#37910";
 }

@@ -45,5 +45,6 @@
     <string name="recent_searches">Recent searches:</string>
     <string name="temp_3d_wallpapers">3d wallpapers</string>
     <string name="text_unsave">Unsave</string>
+    <string name="copy_right">Copyrights © %1$d</string>
 
 </resources>
