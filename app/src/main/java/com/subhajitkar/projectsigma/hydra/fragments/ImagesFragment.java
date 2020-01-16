@@ -18,13 +18,16 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.subhajitkar.projectsigma.hydra.R;
 import com.subhajitkar.projectsigma.hydra.activities.DetailActivity;
 import com.subhajitkar.projectsigma.hydra.activities.SecondActivity;
@@ -44,6 +47,7 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
     private ProgressBar progressBar;
     private int frag_id=0;
     private static RecyclerView images_list;
+    private LinearLayout root;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,12 +81,13 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         Log.d(TAG, "onViewCreated: gets called");
 
         progressBar = view.findViewById(R.id.progressBar);
+        root = view.findViewById(R.id.root_layout);
 
         if (frag_id != 2 && frag_id != 4) {
             progressBar.setVisibility(View.VISIBLE);
             new CountDownTimer(5000, 1000) {
                 public void onTick(long millisecondsUntillDone) {
-                    //codes willl be executed everytime in given intervals
+                    //codes will be executed everytime in given intervals
                 }
 
                 public void onFinish() {
@@ -98,6 +103,19 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         images_list.setDrawingCacheEnabled(true);
         images_list.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
         images_list.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+        images_list.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (!recyclerView.canScrollVertically(1)) {
+                    if (!StaticUtils.imagesList.isEmpty()) {
+                        Snackbar.make(root,"Loading more images.",Snackbar.LENGTH_SHORT).show();
+                        loadMore();
+                    }
+                }
+            }
+        });
         if (frag_id != 2) {
             adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.imagesList, 1);  //adapter attached
         }else {
@@ -118,16 +136,15 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         }
         startActivity(intent);
     }
+
     private void updateAdapter(){  // updates the list immediately
         Log.d(TAG, "updateAdapter: updating the list");
-            if (frag_id == 2) {
-                adapter = null;
+        adapter = null;
+            if (frag_id == 2) {  //for saved
                 adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.savedImagesList, 1);  //adapter attached
                 adapter.setOnItemClickListener(this);
-                if (!StaticUtils.savedImagesList.isEmpty()) {
-                    images_list.setAdapter(adapter);
-                }
             }
+        images_list.setAdapter(adapter);
     }
 
     @Override
@@ -137,6 +154,16 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         if (frag_id==2) {
             updateAdapter();
         }
+    }
+
+    private void loadMore(){
+        Log.d(TAG, "loadMore: loading more images.");
+        try {
+            new SecondActivity().run(getContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        adapter.notifyDataSetChanged();
     }
 
     //getting the downloaded images from storage

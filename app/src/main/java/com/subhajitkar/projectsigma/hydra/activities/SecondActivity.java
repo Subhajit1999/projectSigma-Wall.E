@@ -72,7 +72,10 @@ public class SecondActivity extends AppCompatActivity {
         getIntentData();  //receiving intent data
 
         if (frag_id!=3 && frag_id!=4) {     //if not about fragment and downloads
-            StaticUtils.imagesList = new ArrayList<>();
+            StaticUtils.imagesListTemp = new ArrayList<>();
+            if (frag_id!=2){   //if not saved fragment too
+                StaticUtils.imagesList = new ArrayList<>();
+            }
             //restoring saved searches list
             StaticUtils.savedImagesList = getBookmarkArraylist(getApplicationContext());
             if (StaticUtils.savedImagesList == null) {
@@ -123,22 +126,23 @@ public class SecondActivity extends AppCompatActivity {
         Intent intent = getIntent();
         frag_id = intent.getIntExtra(StaticUtils.KEY_FRAG_ID,0);
         search_term = intent.getStringExtra(StaticUtils.KEY_SEARCH_DATA);
+    }
+
+    public void run(final Context context) throws IOException{
+        Log.d(TAG, "run: up and running...");
+
         if (frag_id==0 || frag_id==1) {  //if home fragment & search fragment
             Log.d(TAG, "getIntentData: frag id not 2");
             if (search_term == null) {
-                urlImage = "https://api.pexels.com/v1/curated?per_page=30";
+                urlImage = "https://api.pexels.com/v1/curated";
             } else {
                 int randPage;
                 do {
                     randPage = new Random().nextInt(20);
                 }while(randPage==0);
-                urlImage = "https://api.pexels.com/v1/search?query=" + search_term.toLowerCase() + "&per_page=30&page=" + randPage;
+                urlImage = "https://api.pexels.com/v1/search?query=" + search_term.toLowerCase() + "&per_page=20&page=" + randPage;
             }
         }
-    }
-
-    public void run(final Context context) throws IOException{
-        Log.d(TAG, "run: up and running...");
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -161,8 +165,8 @@ public class SecondActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Log.d(TAG, "run: integrated successfully: ");
-                        if (!StaticUtils.imagesList.isEmpty()){
-                            StaticUtils.imagesList.clear();
+                        if (!StaticUtils.imagesListTemp.isEmpty()){
+                            StaticUtils.imagesListTemp.clear();
                         }
 
                         try {
@@ -188,12 +192,15 @@ public class SecondActivity extends AppCompatActivity {
                                     String imgSrcTiny = srcObject.getString("tiny");
                                     ImageDifferentSize imageArray = new ImageDifferentSize(imgSrcOrg,imgSrcLarg,imgSrcMid,imgSrcSml,imgSrcPort,imgSrcLand,imgSrcTiny);
 
-                                    StaticUtils.imagesList.add(new ImagesItem(imageId, srcName, dimen, srcUrl,imageArray));
+                                    StaticUtils.imagesListTemp.add(new ImagesItem(imageId, srcName, dimen, srcUrl,imageArray));
                                     ImagesFragment.adapter.notifyDataSetChanged();
                                 }
                             }else{
                                 Toast.makeText(context,"Sorry! No wallpapers found related to your search.",Toast.LENGTH_LONG).show();
                             }
+                            Log.d(TAG, "run: List size: "+StaticUtils.imagesListTemp.size());
+                            boolean isAddSucceed = StaticUtils.imagesList.addAll(StaticUtils.imagesListTemp);
+                            Log.d(TAG, "onCreate: Copy operation succeed:"+isAddSucceed+", Final arralist size: "+StaticUtils.imagesList.size());
                         } catch (JSONException e) {
                             Log.d(TAG, "onResponse: Json Parsing data error.");
                             e.printStackTrace();
@@ -256,6 +263,14 @@ public class SecondActivity extends AppCompatActivity {
         super.onPause();
         if (frag_id!=3 && frag_id!=4) {
             saveBookmarkArraylist(getApplicationContext(), StaticUtils.savedImagesList);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!StaticUtils.imagesList.isEmpty()) {
+            StaticUtils.imagesList.clear();
         }
     }
 }
