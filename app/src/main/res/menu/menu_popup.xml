@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item android:id="@+id/popup_delete"
+        android:title="Delete"
+        android:icon="@drawable/popup_delete"
+        android:orderInCategory="1"/>
+    <item android:id="@+id/popup_send"
+        android:title="Send"
+        android:icon="@drawable/popup_send"
+        android:orderInCategory="2"/>
+    <item android:id="@+id/popup_set_wallpaper"
+        android:title="Set wallpaper"
+        android:icon="@drawable/popup_set_wallpaper"
+        android:orderInCategory="3"/>
+</menu>

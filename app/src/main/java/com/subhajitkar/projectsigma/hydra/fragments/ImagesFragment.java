@@ -4,12 +4,17 @@ package com.subhajitkar.projectsigma.hydra.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +28,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -83,6 +89,10 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         progressBar = view.findViewById(R.id.progressBar);
         root = view.findViewById(R.id.root_layout);
 
+        if (frag_id==2 && StaticUtils.savedImagesList.isEmpty()){
+            Snackbar.make(root,"Looks like no images in the saved list.",Snackbar.LENGTH_SHORT).show();
+        }
+
         if (frag_id != 2 && frag_id != 4) {
             progressBar.setVisibility(View.VISIBLE);
             new CountDownTimer(5000, 1000) {
@@ -109,16 +119,20 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
                 super.onScrollStateChanged(recyclerView, newState);
 
                 if (!recyclerView.canScrollVertically(1)) {
-                    if (!StaticUtils.imagesList.isEmpty()) {
-                        Snackbar.make(root,"Loading more images.",Snackbar.LENGTH_SHORT).show();
-                        loadMore();
+                    if (frag_id!=2 && frag_id!=4) {
+                        if (!StaticUtils.imagesList.isEmpty()) {
+                            Snackbar.make(root, "Loading more images.", Snackbar.LENGTH_SHORT).show();
+                            loadMore();
+                        }
                     }
                 }
             }
         });
-        if (frag_id != 2) {
+        if (frag_id != 2 && frag_id != 4) {  //if not saved
             adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.imagesList, 1);  //adapter attached
-        }else {
+        }else if (frag_id==4){
+            adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.imagesList, 2);  //adapter attached
+        }else{
             adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.savedImagesList, 1);  //adapter attached
         }
         adapter.setOnItemClickListener(this);
@@ -128,13 +142,15 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
     @Override
     public void onItemClick(int position) {
         Log.d(TAG, "onItemClick: recycler click action");
-        Intent intent = new Intent(getContext(), DetailActivity.class);
-        intent.putExtra(StaticUtils.KEY_CLICKED_IMAGE,position);
-        intent.putExtra(StaticUtils.KEY_SAVED_FRAG_ID,frag_id);
-        if (frag_id != 2) {
-            intent.putExtra(StaticUtils.KEY_SEARCH_TERM, SecondActivity.search_term);
+        if (frag_id!=4) {
+            Intent intent = new Intent(getContext(), DetailActivity.class);
+            intent.putExtra(StaticUtils.KEY_CLICKED_IMAGE, position);
+            intent.putExtra(StaticUtils.KEY_SAVED_FRAG_ID, frag_id);
+            if (frag_id != 2) {
+                intent.putExtra(StaticUtils.KEY_SEARCH_TERM, SecondActivity.search_term);
+            }
+            startActivity(intent);
         }
-        startActivity(intent);
     }
 
     private void updateAdapter(){  // updates the list immediately
@@ -165,8 +181,4 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         }
         adapter.notifyDataSetChanged();
     }
-
-    //getting the downloaded images from storage
-
-    //downloaded images itemClick action
 }

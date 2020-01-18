@@ -125,17 +125,19 @@ public class MainActivity extends AppCompatActivity
             }
 
         }else if (id == R.id.nav_downloads) {
-//            //downloaded images
-//            Intent i = new Intent(MainActivity.this, SecondActivity.class);
-//            i.putExtra(StaticUtils.KEY_FRAG_ID,4);  //4 for downloads section
-//            i.putExtra(StaticUtils.KEY_SEARCH_DATA,"Downloads");
-//            startActivity(i);
+            //downloaded images
+            if (DetailActivity.checkPermissions(getApplicationContext(),MainActivity.this)) {
+                Intent i = new Intent(MainActivity.this, SecondActivity.class);
+                i.putExtra(StaticUtils.KEY_FRAG_ID, 4);  //4 for downloads section
+                i.putExtra(StaticUtils.KEY_SEARCH_DATA, "Downloads");
+                startActivity(i);
+            }
 
         } else if (id == R.id.nav_share) {
             //share the app intent
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey! look what I found from play store.\nDownload cool & amazing wallpapers for your device from this app, "+getResources().getString(R.string.app_name)+", among various categories.\n\nCheck this out:\nhttps://play.google.com/store/apps/details?id="+getPackageName()+"\nDownload now:)");
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "Hey! look what I found from play store.\nDownload cool & amazing wallpapers for your device from this app, "+getResources().getString(R.string.app_name)+", among various categories.\n\nCheck this out:\n"+StaticUtils.playStoreUrlDefault+getPackageName()+"\nDownload now:)");
             sendIntent.setType("text/plain");
             startActivity(Intent.createChooser(sendIntent, "Share app through..."));
 

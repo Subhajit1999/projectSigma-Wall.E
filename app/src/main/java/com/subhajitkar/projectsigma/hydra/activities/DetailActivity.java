@@ -10,7 +10,9 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -70,6 +72,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -147,7 +150,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             shareIntent();  //0 for default list
             manageDownload();
             manageSaveUnsave();
-            setWallpaper();
+            manageSetWallpaper();
     }
 
     public void funcUrl(int identifier){
@@ -351,7 +354,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         //setting adapter
-        adapter = new RecyclerAdapter(mContext,StaticUtils.categoryList, StaticUtils.recommendedImagesList,2);  //adapter attached
+        adapter = new RecyclerAdapter(mContext,StaticUtils.categoryList, StaticUtils.recommendedImagesList,1);  //adapter attached
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
     }
@@ -516,7 +519,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: image download button click");
-                if (checkPermissions()){
+                if (checkPermissions(mContext,DetailActivity.this)){
                     // permissions granted.
                     downloadDialog();
                 }
@@ -585,18 +588,18 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         dialog.show();
     }
 
-    private boolean checkPermissions() {
+    public static boolean checkPermissions(Context context, Activity activity) {
         Log.d(TAG, "checkPermissions: checking and requesting permission");
         int result;
         List<String> listPermissionsNeeded = new ArrayList<>();
         for (String p:permissions) {
-            result = ContextCompat.checkSelfPermission(mContext,p);
+            result = ContextCompat.checkSelfPermission(context,p);
             if (result != PackageManager.PERMISSION_GRANTED) {
                 listPermissionsNeeded.add(p);
             }
         }
         if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new
+            ActivityCompat.requestPermissions(activity, listPermissionsNeeded.toArray(new
                     String[listPermissionsNeeded.size()]), StaticUtils.MULTIPLE_PERMISSIONS);
             return false;
         }
@@ -609,7 +612,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         if (requestCode == StaticUtils.MULTIPLE_PERMISSIONS) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // permissions granted.
-                downloadDialog();
+                    downloadDialog();
             } else {
                 // no permissions granted.
                 showPermissionDialog();
@@ -622,12 +625,12 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle("Are you sure?");
-        builder.setMessage("You'll not be able to download wallpapers without these permissions.");
+        builder.setMessage("You'll not be able to se this app properly without these permissions.");
         builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //re-requesting permissions
-                checkPermissions();
+                checkPermissions(mContext,DetailActivity.this);
 
             }
         });
@@ -732,48 +735,22 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
 
     }
 
-    public void setWallpaper(){
+    public void manageSetWallpaper(){
         Log.d(TAG, "setWallpaper: setting wallpaper");
         LinearLayout linear_setWall = findViewById(R.id.linear_detail_setWall);
         linear_setWall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //setting wallpaper
-                WallpaperManager manager = WallpaperManager.getInstance(getApplicationContext());
-                try{
-                    manager.setBitmap(downloadedBitmap);
-                    Snackbar.make(coordinatorLayout,"Wallpaper set successfully.",Snackbar.LENGTH_SHORT).show();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
+                if (checkPermissions(mContext,DetailActivity.this)) {
+                    WallpaperManager manager = WallpaperManager.getInstance(getApplicationContext());
+                    try{
+                        manager.setBitmap(downloadedBitmap);
+                        Snackbar.make(coordinatorLayout,"Wallpaper set successfully.",Snackbar.LENGTH_SHORT).show();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }                }
             }
         });
-    }
-
-//    public Bitmap loadImageBitmap(Context context, String imageName) {
-//        Bitmap bitmap = null;
-//        FileInputStream fiStream;
-//        try {
-//            fiStream    = context.openFileInput(imageName);
-//            bitmap      = BitmapFactory.decodeStream(fiStream);
-//            fiStream.close();
-//        } catch (Exception e) {
-//            Log.d("saveImage", "Exception 3, Something went wrong!");
-//            e.printStackTrace();
-//        }
-//        return bitmap;
-//    }
-
-    public String getFileFullPath(String fileName) {
-        Log.d(TAG, "getFileFullPath: getting the full file path");
-        try {
-
-            if (fileName != null && !fileName.isEmpty()) {
-                String base = imageDirect.toString();
-                return base + fileName;
-            } else return "";
-        } catch (Exception e) {
-            return "";
-        }
     }
 }

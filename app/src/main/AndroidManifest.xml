@@ -36,6 +36,16 @@
         <activity
             android:name=".activities.SecondActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${packageName}"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider" />
+        </provider>
     </application>
 
 </manifest>

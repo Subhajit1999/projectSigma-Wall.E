@@ -22,6 +22,7 @@ public class StaticUtils {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.SET_WALLPAPER
     };
+    public static final String playStoreUrlDefault = "https://play.google.com/store/apps/details?id=";
     public static ArrayList<String> recentSearchesList;
     public static ArrayList<ImagesItem> savedImagesList;
     public static final String KEY_SAVED_PREFERENCES = "KEY_SAVED_PREFERENCES#36497";

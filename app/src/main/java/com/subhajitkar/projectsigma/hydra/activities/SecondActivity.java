@@ -269,8 +269,10 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (!StaticUtils.imagesList.isEmpty()) {
-            StaticUtils.imagesList.clear();
+        if (frag_id==0 || frag_id==1) {
+            if (!StaticUtils.imagesList.isEmpty()) {
+                StaticUtils.imagesList.clear();
+            }
         }
     }
 }
