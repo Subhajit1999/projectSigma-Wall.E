@@ -1,11 +1,14 @@
 package com.subhajitkar.projectsigma.hydra.activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationCompat.Builder;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -13,6 +16,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -89,6 +96,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
     private static final String TAG = "DetailActivity";
 
     private AppBarLayout appBarLayout;
+    private DownloadManager downloadManager;
     private Toolbar toolbar;
     private boolean appBarExpanded,saved=false;
     private Context mContext = DetailActivity.this;
@@ -101,9 +109,9 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
     private BroadcastReceiver broadcastReceiver;
     private TextView photographer,saveText;
     private ImagesItem image;
-    private File imageDirect;
     private Bitmap downloadedBitmap;
     private int orientation;
+    private String string;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,46 +119,49 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-            StaticUtils.recommendedImagesList = new ArrayList<>();  //initializing the arraylist
-            //setting up to get the data
-            fragId = getIntent().getIntExtra(StaticUtils.KEY_SAVED_FRAG_ID, 0);
-            if (fragId != 2) {
-                search_term = getIntent().getStringExtra(StaticUtils.KEY_SEARCH_TERM);
-            } else {
-                int randInt = new Random().nextInt(16);
-                search_term = StaticUtils.categoryList.get(randInt).getmTitle();
-            }
-            checkNetworkAvailabilty(search_term);
-            coordinatorLayout = findViewById(R.id.root_coordinator);
-            photographer = findViewById(R.id.textAttrPhotographer);
-            pexels = findViewById(R.id.roundedPexels);
+        StaticUtils.recommendedImagesList = new ArrayList<>();  //initializing the arraylist
+        //setting up to get the data
+        fragId = getIntent().getIntExtra(StaticUtils.KEY_SAVED_FRAG_ID, 0);
+        if (fragId != 2) {
+            search_term = getIntent().getStringExtra(StaticUtils.KEY_SEARCH_TERM);
+        } else {
+            int randInt = new Random().nextInt(16);
+            search_term = StaticUtils.categoryList.get(randInt).getmTitle();
+        }
+        checkNetworkAvailabilty(search_term);
+        coordinatorLayout = findViewById(R.id.root_coordinator);
+        photographer = findViewById(R.id.textAttrPhotographer);
+        pexels = findViewById(R.id.roundedPexels);
 
-            setUpAppBar();
-            setupToolBar();
-            //setting up the image
-            imagePos = getIntent().getIntExtra(StaticUtils.KEY_CLICKED_IMAGE, 0);
-            if (fragId != 2) {
-                listId = 0;
-                image = StaticUtils.imagesList.get(imagePos);
-            } else {
-                listId = fragId;
-                image = StaticUtils.savedImagesList.get(imagePos);
-            }
-            //setting image based on orientation
-            orientation = getResources().getConfiguration().orientation;
-            if (orientation==1) {
-                imageUrl = image.getmImagesArray().getmPortrait();
-            }else{
-                imageUrl = image.getmImagesArray().getmLandscape();
-            }
-            loadImage(imageUrl);
-            File_Name = URLUtil.guessFileName(image.getmImagesArray().getmOriginal(), null, null);
-            setupRecycler();
-            funcUrl(listId); //0 indicates the default imageslist from imagesFragment
-            shareIntent();  //0 for default list
-            manageDownload();
-            manageSaveUnsave();
-            manageSetWallpaper();
+        //system downloadManager service
+        downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+
+        setUpAppBar();
+        setupToolBar();
+        //setting up the image
+        imagePos = getIntent().getIntExtra(StaticUtils.KEY_CLICKED_IMAGE, 0);
+        if (fragId != 2) {
+            listId = 0;
+            image = StaticUtils.imagesList.get(imagePos);
+        } else {
+            listId = fragId;
+            image = StaticUtils.savedImagesList.get(imagePos);
+        }
+        //setting image based on orientation
+        orientation = getResources().getConfiguration().orientation;
+        if (orientation==1) {
+            imageUrl = image.getmImagesArray().getmPortrait();
+        }else{
+            imageUrl = image.getmImagesArray().getmLandscape();
+        }
+        loadImage(imageUrl);
+        File_Name = URLUtil.guessFileName(image.getmImagesArray().getmOriginal(), null, null);
+        setupRecycler();
+        funcUrl(listId); //0 indicates the default imageslist from imagesFragment
+        shareIntent();  //0 for default list
+        manageDownload();
+        manageSaveUnsave();
+        manageSetWallpaper();
     }
 
     public void funcUrl(int identifier){
@@ -433,7 +444,6 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
                         }
                     }
                 });
-
             }
         });
     }
@@ -625,7 +635,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle("Are you sure?");
-        builder.setMessage("You'll not be able to se this app properly without these permissions.");
+        builder.setMessage("You'll not be able to see this app properly without these permissions.");
         builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -641,42 +651,18 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
     public void downloadImage(String ImageUrl){
         Log.d(TAG, "downloadImage: downloading image. ImageUrl: "+ImageUrl);
 
-        Picasso.with(mContext)
-                .load(ImageUrl)
-                .into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        Log.d(TAG, "onBitmapLoaded: bitmap: "+bitmap.toString());
-                        createDirectoryAndSaveFile(bitmap,File_Name);
-                    }
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable) {
-                        Snackbar.make(coordinatorLayout,"Sorry! there's an error downloading the wallpaper.",Snackbar.LENGTH_SHORT).show();
-                    }
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        Snackbar.make(coordinatorLayout,"Downloading...",Snackbar.LENGTH_SHORT).show();
-                    }
-                });
-    }
+        Uri downloadUri = Uri.parse(ImageUrl);
+        DownloadManager.Request request = new DownloadManager.Request(downloadUri);
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+        request.setAllowedOverRoaming(false);
+        request.setTitle("Wall.e");
+        request.setDescription("Downloading: " + File_Name);
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES,"/Wall.e/"+File_Name);
 
-    private void createDirectoryAndSaveFile(Bitmap imageToSave, String fileName) {
-        Log.d(TAG, "createDirectoryAndSaveFile: saving the image into device memory");
-        imageDirect = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Wall.e");
-
-        if (!imageDirect.exists()) {
-            imageDirect.mkdirs();
-        }
-        File file = new File(imageDirect,fileName);
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            imageToSave.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            out.flush();
-            out.close();
-            Snackbar.make(coordinatorLayout,"Wallpaper downloaded successfully.",Snackbar.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Snackbar.make(coordinatorLayout, "Downloading wallpaper...", Snackbar.LENGTH_SHORT).show();
+        downloadManager.enqueue(request);
     }
 
     public boolean isImageSaved(){

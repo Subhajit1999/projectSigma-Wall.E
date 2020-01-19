@@ -52,6 +52,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
     private ArrayList<ImagesItem> mImagesList;
     private int mListId;
     private ArrayList<String> mDownloadedImagesList;
+    private File imageDirect;
 
     public RecyclerAdapter(Context context, ArrayList<CategoryItem> categoryList,ArrayList<ImagesItem> imagesList, int listId) {
         Log.d(TAG, "RecyclerAdapter: constructor");
@@ -63,6 +64,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
             mImagesList = imagesList;
         }else{
             mDownloadedImagesList = new ArrayList<>();
+            imageDirect = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "/Wall.e");
             getDownloadedFilePaths();
         }
     }
@@ -70,13 +72,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
     private void getDownloadedFilePaths() {
         Log.d(TAG, "getDownloadedFilePaths: getting downloaded images files paths from directory.");
 
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Wall.e");
-
         if (!mDownloadedImagesList.isEmpty()){
             mDownloadedImagesList.clear();
         }
-        if (dir.isDirectory()) {
-            File[] listFile = dir.listFiles();
+        if (imageDirect.isDirectory()) {
+            File[] listFile = imageDirect.listFiles();
             if (listFile.length<=0){
                 Toast.makeText(mContext,"No images found. Try to download some.",Toast.LENGTH_SHORT).show();
             }
@@ -229,9 +229,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
     private void deleteItem(int position){
         Log.d(TAG, "deleteItem: deleting item.");
 
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Wall.e");
         String fileName = URLUtil.guessFileName("file://"+mDownloadedImagesList.get(position),null,null);
-        File file = new File(dir,fileName);
+        File file = new File(imageDirect,fileName);
         boolean deleted = file.delete();
         Log.d(TAG, "deleteItem: deleted file: "+deleted);
         getDownloadedFilePaths();
@@ -245,9 +244,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
         sendIntent.setAction(Intent.ACTION_SEND);
 
         //getting image file from storage
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Wall.e");
         String fileName = URLUtil.guessFileName("file://"+mDownloadedImagesList.get(position),null,null);
-        File file = new File(dir,fileName);
+        File file = new File(imageDirect,fileName);
         Bitmap bmp = BitmapFactory.decodeFile(mDownloadedImagesList.get(position));
         Uri bmpUri = null;
         try {  //for API 24 or higher, using FileProvider to avoid errors
