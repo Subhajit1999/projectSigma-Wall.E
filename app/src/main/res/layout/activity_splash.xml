@@ -11,5 +11,5 @@
         android:layout_height="wrap_content"
         android:scaleType="centerInside"
         android:src="@drawable/circle_icon"
-        android:layout_margin="70dp"/>
+        android:layout_margin="@dimen/margin_70dp"/>
 </RelativeLayout>

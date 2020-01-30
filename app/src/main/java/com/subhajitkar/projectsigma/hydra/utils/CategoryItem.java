@@ -19,18 +19,8 @@ public class CategoryItem {
         return mImage;
     }
 
-    public void setmImage(int mImage) {
-        Log.d(TAG, "setmImage: setting the image");
-        this.mImage = mImage;
-    }
-
     public String getmTitle() {
         Log.d(TAG, "getmTitle: getting the title");
         return mTitle;
-    }
-
-    public void setmTitle(String mTitle) {
-        Log.d(TAG, "setmTitle: setting the title");
-        this.mTitle = mTitle;
     }
 }

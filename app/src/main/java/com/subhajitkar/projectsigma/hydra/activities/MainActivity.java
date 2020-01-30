@@ -1,8 +1,12 @@
 package com.subhajitkar.projectsigma.hydra.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,12 +22,16 @@ import android.view.Gravity;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.view.MenuItem;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -40,13 +48,17 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.Menu;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.subhajitkar.projectsigma.hydra.utils.StaticUtils.permissions;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MaterialSearchBar.OnSearchActionListener, PopupMenu.OnMenuItemClickListener {
@@ -56,6 +68,7 @@ public class MainActivity extends AppCompatActivity
     public static MaterialSearchBar searchBar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private static List<String> listPermissionsNeeded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +116,22 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
+    public void grantPermissionBottomSheet(){
+        View dialogView = getLayoutInflater().inflate(R.layout.layout_bottomsheet, null);
+        final BottomSheetDialog dialog = new BottomSheetDialog(this);
+        Button ok = dialogView.findViewById(R.id.bt_bottomsheet);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: bottomSheet button clicked.");
+                requestPermissions(MainActivity.this);
+                dialog.dismiss();
+            }
+        });
+        dialog.setContentView(dialogView);
+        dialog.show();
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Log.d(TAG, "onNavigationItemSelected: navigation item pressed.");
@@ -117,7 +145,7 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_saved) {
             NetworkUtils network = new NetworkUtils(this);
-            if(network.checkConnection()){      //if network connected
+            if(network.checkConnection(drawer)){   //if network connected
                 Intent i = new Intent(MainActivity.this, SecondActivity.class);
                 i.putExtra(StaticUtils.KEY_FRAG_ID,2);
                 i.putExtra(StaticUtils.KEY_SEARCH_DATA,"Saved");
@@ -126,11 +154,13 @@ public class MainActivity extends AppCompatActivity
 
         }else if (id == R.id.nav_downloads) {
             //downloaded images
-            if (DetailActivity.checkPermissions(getApplicationContext(),MainActivity.this)) {
+            if (permissionsGranted(this)) {
                 Intent i = new Intent(MainActivity.this, SecondActivity.class);
                 i.putExtra(StaticUtils.KEY_FRAG_ID, 4);  //4 for downloads section
                 i.putExtra(StaticUtils.KEY_SEARCH_DATA, "Downloads");
                 startActivity(i);
+            }else{
+                grantPermissionBottomSheet();
             }
 
         } else if (id == R.id.nav_share) {
@@ -206,7 +236,7 @@ public class MainActivity extends AppCompatActivity
         i.putExtra(StaticUtils.KEY_FRAG_ID,1);
         i.putExtra(StaticUtils.KEY_SEARCH_DATA,String.valueOf(text));
 
-        if(new NetworkUtils(getApplicationContext()).checkConnection()) {  //start intent if network connected
+        if(new NetworkUtils(getApplicationContext()).checkConnection(drawer)) {  //start intent if network connected
             StaticUtils.recentSearchesList.add(String.valueOf(text));  //adds the query to the recents list
 
             if (StaticUtils.recentSearchesList.size()>20){
@@ -231,9 +261,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
+    public void onPointerCaptureChanged(boolean hasCapture) {}
 
     public void saveArrayList(ArrayList<String> list, String key){
         Log.d(TAG, "saveArrayList: saving recent searchList data");
@@ -290,9 +318,7 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
     }
 
@@ -300,5 +326,56 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         navigationView.setCheckedItem(R.id.nav_home);
+        if (!permissionsGranted(this)){   //checking and requesting permissions
+            grantPermissionBottomSheet();
+        }
+    }
+
+    public static boolean permissionsGranted(Context context) {
+        Log.d(TAG, "checkPermissions: checking if permissions granted.");
+        int result;
+        listPermissionsNeeded = new ArrayList<>();
+        for (String p:permissions) {
+            result = ContextCompat.checkSelfPermission(context,p);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
+            }
+        }
+        //if all/some permissions not granted
+        return listPermissionsNeeded.isEmpty();
+    }
+
+    public static void requestPermissions(Activity activity){
+        Log.d(TAG, "requestPermissions: requesting permissions.");
+        ActivityCompat.requestPermissions(activity, listPermissionsNeeded.toArray(new
+                String[listPermissionsNeeded.size()]), StaticUtils.MULTIPLE_PERMISSIONS);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: action when permission granted or denied");
+        if (requestCode == StaticUtils.MULTIPLE_PERMISSIONS) {
+            if (grantResults.length <= 0) {
+                // no permissions granted.
+                showPermissionDialog();
+            }
+        }
+    }
+
+    public void showPermissionDialog(){
+        Log.d(TAG, "showPermissionDialog: requesting permissions");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Are you sure?");
+        builder.setMessage("You'll not be able to use this app properly without these permissions.");
+        builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //re-requesting permissions
+                requestPermissions(MainActivity.this);
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 }

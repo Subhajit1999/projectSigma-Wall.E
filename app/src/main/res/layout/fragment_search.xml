@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/search_root"
     tools:context=".fragments.SearchFragment">
 
     <TextView
@@ -10,12 +12,22 @@
         android:layout_height="wrap_content"
         android:id="@+id/tv_recent_search"
         android:text="@string/recent_searches"
-        android:padding="5dp"/>
+        android:padding="@dimen/margin_5dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_none"
+        android:gravity="center"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="@dimen/text_16sp"
+        android:visibility="gone"
+        android:text="@string/no_suggestions_found"
+        android:padding="@dimen/margin_8dp"/>
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/search_suggest_list"
-        android:layout_below="@id/tv_recent_search"
         android:divider="@android:color/transparent"/>
-</RelativeLayout>
+</LinearLayout>

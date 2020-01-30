@@ -14,8 +14,8 @@
 
     <ImageView
         android:id="@+id/imageLogo"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="@dimen/image_80dp"
+        android:layout_height="@dimen/image_80dp"
         android:contentDescription="@string/nav_header_desc"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:src="@drawable/circle_icon" />

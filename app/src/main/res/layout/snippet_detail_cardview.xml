@@ -3,9 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_margin="8dp"
-    app:cardElevation="5dp"
-    app:cardCornerRadius="5dp">
+    android:layout_margin="@dimen/margin_8dp"
+    app:cardElevation="@dimen/margin_5dp"
+    app:cardCornerRadius="@dimen/margin_5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,45 +16,45 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginLeft="5dp"
-            android:padding="5dp"
-            android:layout_marginStart="5dp"
+            android:layout_marginLeft="@dimen/margin_5dp"
+            android:padding="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
             android:gravity="center_vertical">
 
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="@dimen/image_30dp"
+                android:layout_height="@dimen/image_30dp"
                 android:id="@+id/roundedPexels"
                 android:src="@drawable/pexels"
                 android:background="@drawable/item_click"
-                android:layout_marginRight="3dp"
-                android:layout_marginEnd="2dp" />
+                android:layout_marginRight="@dimen/margin_3dp"
+                android:layout_marginEnd="@dimen/border_2dp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/textAttr1"
                 android:text="@string/photo_by"
-                android:textSize="12sp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginStart="3dp" />
+                android:textSize="@dimen/text_12sp"
+                android:layout_marginLeft="@dimen/margin_3dp"
+                android:layout_marginStart="@dimen/margin_3dp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/textAttrPhotographer"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="@dimen/margin_5dp"
                 android:textStyle="bold"
                 android:textColor="@color/purple"
                 android:background="@drawable/item_click"
                 android:text="@string/photographer_name_temp"
-                android:textSize="13sp"
-                android:layout_marginStart="5dp" />
+                android:textSize="@dimen/text_14sp"
+                android:layout_marginStart="@dimen/margin_5dp" />
             </LinearLayout>
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="4"
-            android:layout_margin="10dp"
+            android:layout_margin="@dimen/margin_10dp"
             android:baselineAligned="false">
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -69,13 +69,13 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/iv_detail_save"
                     android:src="@drawable/ic_save_unchecked"
-                    android:padding="5dp"/>
+                    android:padding="@dimen/margin_5dp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/tv_detail_save"
                     android:text="@string/detail_save"
-                    android:textSize="15sp"/>
+                    android:textSize="@dimen/text_15sp"/>
             </LinearLayout>
         <LinearLayout
             android:layout_width="wrap_content"
@@ -90,13 +90,13 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/iv_detail_setWall"
                 android:src="@drawable/ic_set_wallpaper"
-                android:padding="5dp"/>
+                android:padding="@dimen/margin_5dp"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_detail_setWall"
                 android:text="@string/detail_set_wallpaper"
-                android:textSize="15sp"/>
+                android:textSize="@dimen/text_15sp"/>
         </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -111,14 +111,14 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/iv_detail_download"
                     android:src="@drawable/ic_download"
-                    android:padding="5dp"/>
+                    android:padding="@dimen/margin_5dp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/tv_detail_download"
                     android:gravity="center"
                     android:text="@string/detail_download"
-                    android:textSize="15sp"/>
+                    android:textSize="@dimen/text_15sp"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -133,13 +133,13 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/iv_detail_share"
                     android:src="@drawable/ic_share"
-                    android:padding="5dp"/>
+                    android:padding="@dimen/margin_5dp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/tv_detail_share"
                     android:text="@string/detail_share"
-                    android:textSize="15sp"/>
+                    android:textSize="@dimen/text_15sp"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

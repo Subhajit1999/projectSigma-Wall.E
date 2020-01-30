@@ -23,7 +23,7 @@
             app:mt_placeholderColor="@android:color/black"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"/>
+            android:layout_margin="@dimen/margin_5dp"/>
 
 <!--        <androidx.appcompat.widget.Toolbar-->
 <!--            android:id="@+id/toolbar"-->

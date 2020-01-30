@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.subhajitkar.projectsigma.hydra.R;
+import com.subhajitkar.projectsigma.hydra.fragments.SearchFragment;
 
 import java.util.List;
 
@@ -62,6 +63,9 @@ public class SuggestionListAdapter extends BaseAdapter {
                 //deletes the search item from list
                 StaticUtils.recentSearchesList.remove(mSearchItems.size()-position-1);
                 notifyDataSetChanged();
+                if (StaticUtils.recentSearchesList.isEmpty()) {
+                    SearchFragment.tv_no_suggestion.setVisibility(View.VISIBLE);
+                }
             }
         });
         return convertView;

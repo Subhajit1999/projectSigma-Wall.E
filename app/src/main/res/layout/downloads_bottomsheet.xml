@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottomSheet_56dp"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:gravity="center_vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_bottomsheet"
+        android:text="@string/bottomSheet_choose_option"
+        android:textSize="@dimen/text_16sp"
+        android:layout_marginStart="@dimen/margin_16dp"
+        android:layout_marginLeft="@dimen/margin_16dp" />
+    </LinearLayout>
+<!--    <View-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="1dp"-->
+<!--        android:layout_marginStart="10dp"-->
+<!--        android:layout_marginEnd="10dp"-->
+<!--        android:background="@android:color/darker_gray" />-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottomSheet_56dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/item_click_effect"
+        android:id="@+id/bottomsheet_delete">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/iv_bottomsheet_delete"
+            android:layout_margin="@dimen/margin_16dp"
+            android:src="@drawable/popup_delete" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_8dp"
+            android:textSize="@dimen/text_16sp"
+            android:id="@+id/tv_bottomsheet_delete"
+            android:textColor="@android:color/holo_red_dark"
+            android:text="@string/bottomSheet_delete_image"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottomSheet_56dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/item_click_effect"
+        android:id="@+id/bottomsheet_send">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/iv_bottomsheet_send"
+            android:src="@drawable/popup_share"
+            android:layout_margin="@dimen/margin_16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_bottomsheet_share"
+            android:layout_margin="@dimen/margin_8dp"
+            android:textSize="@dimen/text_16sp"
+            android:textColor="@android:color/black"
+            android:text="@string/bottomSheet_send_image"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottomSheet_56dp"
+        android:gravity="center_vertical"
+        android:background="@drawable/item_click_effect"
+        android:id="@+id/bottomsheet_setWallpaper">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/iv_bottomsheet_setWallpaper"
+            android:src="@drawable/popup_set_wallpaper"
+            android:layout_margin="@dimen/margin_16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_bottomsheet_setWallpaper"
+            android:layout_margin="@dimen/margin_8dp"
+            android:textSize="@dimen/text_16sp"
+            android:textColor="@android:color/black"
+            android:text="@string/bottomSheet_set_as_wallpaper"/>
+    </LinearLayout>
+</LinearLayout>

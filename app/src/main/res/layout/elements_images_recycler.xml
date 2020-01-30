@@ -2,9 +2,9 @@
 <androidx.cardview.widget.CardView android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="5dp"
-    app:cardElevation="10dp"
-    android:layout_margin="5dp"
+    app:cardCornerRadius="@dimen/margin_5dp"
+    app:cardElevation="@dimen/margin_10dp"
+    android:layout_margin="@dimen/margin_5dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.makeramen.roundedimageview.RoundedImageView
@@ -12,6 +12,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/iv_wall"
         android:src="@drawable/circle_icon"
-        app:riv_corner_radius="5dp"
+        app:riv_corner_radius="@dimen/margin_5dp"
         android:scaleType="center" />
     </androidx.cardview.widget.CardView>

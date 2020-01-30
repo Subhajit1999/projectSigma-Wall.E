@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/home_root"
     android:orientation="vertical">
 
     <TextView
@@ -10,8 +11,8 @@
         android:id="@+id/tv_cat_title"
         android:text="@string/collections"
         android:textStyle="bold"
-        android:textSize="16sp"
-        android:layout_margin="5dp" />
+        android:textSize="@dimen/text_16sp"
+        android:layout_margin="@dimen/margin_5dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/category_list"

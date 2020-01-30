@@ -3,7 +3,10 @@ package com.subhajitkar.projectsigma.hydra.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.view.View;
 import android.widget.Toast;
+
+import com.google.android.material.snackbar.Snackbar;
 
 public class NetworkUtils {
     private static final String TAG = "NetworkUtils";
@@ -19,11 +22,11 @@ public class NetworkUtils {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    public boolean checkConnection(){
+    public boolean checkConnection(View view){
         if(isOnline()){
             return true;
         }else{
-            Toast.makeText(mContext, StaticUtils.NETWORK_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
+            Snackbar.make(view,StaticUtils.NETWORK_ERROR_MESSAGE,Snackbar.LENGTH_SHORT).show();
             return false;
         }
     }

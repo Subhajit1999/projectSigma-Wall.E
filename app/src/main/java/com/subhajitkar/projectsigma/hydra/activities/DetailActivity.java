@@ -111,7 +111,6 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
     private ImagesItem image;
     private Bitmap downloadedBitmap;
     private int orientation;
-    private String string;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -365,7 +364,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         //setting adapter
-        adapter = new RecyclerAdapter(mContext,StaticUtils.categoryList, StaticUtils.recommendedImagesList,1);  //adapter attached
+        adapter = new RecyclerAdapter(mContext,coordinatorLayout,StaticUtils.categoryList, StaticUtils.recommendedImagesList,1);  //adapter attached
         adapter.setOnItemClickListener(this);
         recyclerView.setAdapter(adapter);
     }
@@ -436,7 +435,7 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
                                     adapter.notifyDataSetChanged();
                                 }
                             }else{
-                                Toast.makeText(mContext,"Sorry! No wallpapers found related to your search.",Toast.LENGTH_LONG).show();
+                                Snackbar.make(coordinatorLayout,"Sorry! No wallpapers found related to your search.",Snackbar.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
                             Log.d(TAG, "onResponse: Json Parsing data error.");
@@ -529,9 +528,11 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: image download button click");
-                if (checkPermissions(mContext,DetailActivity.this)){
+                if (MainActivity.permissionsGranted(mContext)){
                     // permissions granted.
                     downloadDialog();
+                }else{
+                    MainActivity.requestPermissions(DetailActivity.this);
                 }
             }
         });
@@ -596,56 +597,6 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
         builder.setNegativeButton("Cancel",null);
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-    public static boolean checkPermissions(Context context, Activity activity) {
-        Log.d(TAG, "checkPermissions: checking and requesting permission");
-        int result;
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String p:permissions) {
-            result = ContextCompat.checkSelfPermission(context,p);
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(p);
-            }
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(activity, listPermissionsNeeded.toArray(new
-                    String[listPermissionsNeeded.size()]), StaticUtils.MULTIPLE_PERMISSIONS);
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult: action when permission granted or denied");
-        if (requestCode == StaticUtils.MULTIPLE_PERMISSIONS) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // permissions granted.
-                    downloadDialog();
-            } else {
-                // no permissions granted.
-                showPermissionDialog();
-            }
-        }
-    }
-
-    public void showPermissionDialog(){
-        Log.d(TAG, "showPermissionDialog: requesting permissions");
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle("Are you sure?");
-        builder.setMessage("You'll not be able to see this app properly without these permissions.");
-        builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //re-requesting permissions
-                checkPermissions(mContext,DetailActivity.this);
-
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
     }
 
     public void downloadImage(String ImageUrl){
@@ -728,14 +679,17 @@ public class DetailActivity extends AppCompatActivity implements RecyclerAdapter
             @Override
             public void onClick(View v) {
                 //setting wallpaper
-                if (checkPermissions(mContext,DetailActivity.this)) {
+                if (MainActivity.permissionsGranted(mContext)) {
                     WallpaperManager manager = WallpaperManager.getInstance(getApplicationContext());
                     try{
                         manager.setBitmap(downloadedBitmap);
                         Snackbar.make(coordinatorLayout,"Wallpaper set successfully.",Snackbar.LENGTH_SHORT).show();
                     }catch (IOException e){
                         e.printStackTrace();
-                    }                }
+                    }
+                }else{
+                    MainActivity.requestPermissions(DetailActivity.this);
+                }
             }
         });
     }

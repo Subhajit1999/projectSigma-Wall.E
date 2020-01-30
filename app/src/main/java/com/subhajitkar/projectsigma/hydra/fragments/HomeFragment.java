@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.subhajitkar.projectsigma.hydra.R;
@@ -30,6 +31,7 @@ public class HomeFragment extends Fragment implements RecyclerAdapter.OnItemClic
 
     private RecyclerView mRecyclerView;
     private RecyclerAdapter adapter;
+    private View root;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -52,8 +54,9 @@ public class HomeFragment extends Fragment implements RecyclerAdapter.OnItemClic
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        root = view.findViewById(R.id.home_root);
         //setting adapter
-        adapter = new RecyclerAdapter(getContext(),StaticUtils.categoryList, StaticUtils.imagesList,0);  //adapter attached
+        adapter = new RecyclerAdapter(getContext(),root, StaticUtils.categoryList, StaticUtils.imagesList,0);  //adapter attached
         adapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(adapter);
     }
@@ -89,7 +92,7 @@ public class HomeFragment extends Fragment implements RecyclerAdapter.OnItemClic
         Log.d(TAG, "onItemClick: clicked item");
         NetworkUtils network = new NetworkUtils(getContext());
 
-        if(network.checkConnection()){      //if network connected
+        if(network.checkConnection(root)){      //if network connected
             Intent i = new Intent(getActivity(), SecondActivity.class);
             i.putExtra(StaticUtils.KEY_FRAG_ID,0);
             if (position!=0){

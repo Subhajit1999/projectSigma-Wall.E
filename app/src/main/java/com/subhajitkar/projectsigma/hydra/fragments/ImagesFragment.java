@@ -66,7 +66,7 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         }
         if (frag_id != 2 && frag_id != 4) {  //if not saved & downloads action
             try {
-                new SecondActivity().run(getContext());
+                new SecondActivity().run(root);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -129,11 +129,11 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
             }
         });
         if (frag_id != 2 && frag_id != 4) {  //if not saved
-            adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.imagesList, 1);  //adapter attached
+            adapter = new RecyclerAdapter(getContext(), root, StaticUtils.categoryList, StaticUtils.imagesList, 1);  //adapter attached
         }else if (frag_id==4){
-            adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.imagesList, 2);  //adapter attached
+            adapter = new RecyclerAdapter(getContext(), root, StaticUtils.categoryList, StaticUtils.imagesList, 2);  //adapter attached
         }else{
-            adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.savedImagesList, 1);  //adapter attached
+            adapter = new RecyclerAdapter(getContext(), root, StaticUtils.categoryList, StaticUtils.savedImagesList, 1);  //adapter attached
         }
         adapter.setOnItemClickListener(this);
         images_list.setAdapter(adapter);
@@ -157,10 +157,14 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
         Log.d(TAG, "updateAdapter: updating the list");
         adapter = null;
             if (frag_id == 2) {  //for saved
-                adapter = new RecyclerAdapter(getContext(), StaticUtils.categoryList, StaticUtils.savedImagesList, 1);  //adapter attached
+                adapter = new RecyclerAdapter(getContext(),root, StaticUtils.categoryList, StaticUtils.savedImagesList, 1);  //adapter attached
                 adapter.setOnItemClickListener(this);
+                if (!StaticUtils.savedImagesList.isEmpty()) {
+                    images_list.setAdapter(adapter);
+                }else{
+                    Snackbar.make(root,"Looks like no images in the saved list.",Snackbar.LENGTH_SHORT).show();
+                }
             }
-        images_list.setAdapter(adapter);
     }
 
     @Override
@@ -175,7 +179,7 @@ public class ImagesFragment extends Fragment implements RecyclerAdapter.OnItemCl
     private void loadMore(){
         Log.d(TAG, "loadMore: loading more images.");
         try {
-            new SecondActivity().run(getContext());
+            new SecondActivity().run(root);
         } catch (IOException e) {
             e.printStackTrace();
         }

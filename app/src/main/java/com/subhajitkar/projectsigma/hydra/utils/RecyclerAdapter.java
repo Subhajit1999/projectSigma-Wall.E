@@ -3,6 +3,7 @@ package com.subhajitkar.projectsigma.hydra.utils;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,27 +15,33 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.URLUtil;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.Picasso;
 import com.subhajitkar.projectsigma.hydra.R;
 import com.subhajitkar.projectsigma.hydra.activities.DetailActivity;
+import com.subhajitkar.projectsigma.hydra.activities.MainActivity;
+import com.subhajitkar.projectsigma.hydra.activities.SecondActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -53,11 +60,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
     private int mListId;
     private ArrayList<String> mDownloadedImagesList;
     private File imageDirect;
+    private View mView;
 
-    public RecyclerAdapter(Context context, ArrayList<CategoryItem> categoryList,ArrayList<ImagesItem> imagesList, int listId) {
+    public RecyclerAdapter(Context context,View view, ArrayList<CategoryItem> categoryList,ArrayList<ImagesItem> imagesList, int listId) {
         Log.d(TAG, "RecyclerAdapter: constructor");
         mContext = context;
         mListId = listId;
+        mView = view;
         if (mListId == 0) {
             mCategoryList = categoryList;
         }else if( mListId==1){
@@ -78,13 +87,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
         if (imageDirect.isDirectory()) {
             File[] listFile = imageDirect.listFiles();
             if (listFile.length<=0){
-                Toast.makeText(mContext,"No images found. Try to download some.",Toast.LENGTH_SHORT).show();
+                Snackbar.make(mView,"No images found. Try to download some.",Snackbar.LENGTH_SHORT).show();
             }
             for (File value : listFile) {
                 mDownloadedImagesList.add(value.getAbsolutePath());
             }
         }else{
-            Toast.makeText(mContext,"Nothing found. Seems like file doesn't exist.",Toast.LENGTH_SHORT).show();
+            Snackbar.make(mView,"Nothing found. Seems like folder doesn't exist.",Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -168,42 +177,50 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
                 itemView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        PopupMenu popup = new PopupMenu(mContext, itemView);
-
-                        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        final int position = getAdapterPosition();
+                        View dialogView = ((SecondActivity)mContext).getLayoutInflater().inflate(R.layout.downloads_bottomsheet, null);
+                        final BottomSheetDialog dialog = new BottomSheetDialog(mContext);
+                        //delete action
+                        LinearLayout delete = dialogView.findViewById(R.id.bottomsheet_delete);
+                        delete.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                int position = getAdapterPosition();
-                                switch (item.getItemId()) {
-                                    case R.id.popup_delete:
-                                        //action file delete
+                            public void onClick(View v) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setTitle("Warning!");
+                                builder.setIcon(R.drawable.dialog_warning);
+                                builder.setMessage("Are you sure you want to delete the image from the device?");
+                                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        //deleting item
                                         deleteItem(position);
-                                        return true;
-                                    case R.id.popup_send:
-                                        sendImage(position);
-                                        return true;
-                                    case R.id.popup_set_wallpaper:
-                                        setWallpaper(position);
-                                        return true;
-                                    default:
-                                        return false;
-                                }
+                                    }
+                                });
+                                builder.setNegativeButton("Cancel", null);
+                                builder.show();
+                                dialog.dismiss();
                             }
                         });
-                        // here you can inflate your menu
-                        popup.inflate(R.menu.menu_popup);
-                        popup.setGravity(Gravity.CENTER);
-
-                        // setting up icon with menu items.
-                        try {
-                            Field mFieldPopup = popup.getClass().getDeclaredField("mPopup");
-                            mFieldPopup.setAccessible(true);
-                            MenuPopupHelper mPopup = (MenuPopupHelper) mFieldPopup.get(popup);
-                            mPopup.setForceShowIcon(true);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        popup.show();
+                        //send action
+                        LinearLayout send = dialogView.findViewById(R.id.bottomsheet_send);
+                        send.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                sendImage(position);
+                                dialog.dismiss();
+                            }
+                        });
+                        //set wallpaper action
+                        LinearLayout setWallpaper = dialogView.findViewById(R.id.bottomsheet_setWallpaper);
+                        setWallpaper.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                setWallpaper(position);
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.setContentView(dialogView);
+                        dialog.show();
                         return true;
                     }
                 });
@@ -267,14 +284,21 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Recycl
     }
 
     private void setWallpaper(int position){
+        final int mPosition = position;
         Log.d(TAG, "setWallpaper: setting wallpaper");
-        WallpaperManager manager = WallpaperManager.getInstance(mContext);
-        try{
-            Bitmap bitmap = BitmapFactory.decodeFile(mDownloadedImagesList.get(position));
-            manager.setBitmap(bitmap);
-            Toast.makeText(mContext,"Wallpaper set successfully.",Toast.LENGTH_SHORT).show();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Log.d(TAG, "run: set wallpaper thread running.");
+                WallpaperManager manager = WallpaperManager.getInstance(mContext);
+                try{
+                    Bitmap bitmap = BitmapFactory.decodeFile(mDownloadedImagesList.get(mPosition));
+                    manager.setBitmap(bitmap);
+                    Snackbar.make(mView,"Wallpaper set successfully.",Snackbar.LENGTH_SHORT).show();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+//            }
+//        });
     }
 }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/margin_20dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_bottomsheet_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/archivo_black"
+        android:text="Allow permissions"
+        android:textSize="@dimen/text_28sp"
+        android:textColor="@android:color/holo_orange_dark"/>
+
+    <TextView
+        android:id="@+id/tv_bottomsheet_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:text="@string/allow_permission_bottomsheet_msg"
+        android:textSize="@dimen/text_14sp"/>
+    <TextView
+        android:id="@+id/tv_bottomsheet_highlight_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:text="@string/permissions"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/text_16sp"
+        android:textStyle="bold"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/border_2dp"
+        android:background="@android:color/holo_orange_dark"
+        android:layout_marginTop="@dimen/margin_8dp"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:id="@+id/bt_bottomsheet"
+        android:text="@string/bottomSheet_button_go"
+        android:textColor="@android:color/white"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:textStyle="bold"
+        android:layout_margin="@dimen/margin_5dp"
+        android:shadowColor="@android:color/black"/>
+</LinearLayout>

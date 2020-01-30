@@ -62,6 +62,7 @@ public class SecondActivity extends AppCompatActivity {
     private int frag_id;
     public static String search_term;
     private Toolbar toolbar;
+    FrameLayout root;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class SecondActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: creating the layout");
         setContentView(R.layout.activity_second);
 
+        root = findViewById(R.id.second_fragment_container);
         getIntentData();  //receiving intent data
 
         if (frag_id!=3 && frag_id!=4) {     //if not about fragment and downloads
@@ -128,7 +130,7 @@ public class SecondActivity extends AppCompatActivity {
         search_term = intent.getStringExtra(StaticUtils.KEY_SEARCH_DATA);
     }
 
-    public void run(final Context context) throws IOException{
+    public void run(final View view) throws IOException{
         Log.d(TAG, "run: up and running...");
 
         if (frag_id==0 || frag_id==1) {  //if home fragment & search fragment
@@ -196,18 +198,18 @@ public class SecondActivity extends AppCompatActivity {
                                     ImagesFragment.adapter.notifyDataSetChanged();
                                 }
                             }else{
-                                Toast.makeText(context,"Sorry! No wallpapers found related to your search.",Toast.LENGTH_LONG).show();
+                                //replace with snackBar
+                                Toast.makeText(getApplicationContext(),"Sorry! No wallpapers found related to your search.",Toast.LENGTH_SHORT).show();
                             }
                             Log.d(TAG, "run: List size: "+StaticUtils.imagesListTemp.size());
                             boolean isAddSucceed = StaticUtils.imagesList.addAll(StaticUtils.imagesListTemp);
-                            Log.d(TAG, "onCreate: Copy operation succeed:"+isAddSucceed+", Final arralist size: "+StaticUtils.imagesList.size());
+                            Log.d(TAG, "onCreate: Copy operation succeed:"+isAddSucceed+", Final arrayList size: "+StaticUtils.imagesList.size());
                         } catch (JSONException e) {
                             Log.d(TAG, "onResponse: Json Parsing data error.");
                             e.printStackTrace();
                         }
                     }
                 });
-
             }
         });
     }
@@ -259,7 +261,7 @@ public class SecondActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()  {
         super.onPause();
         if (frag_id!=3 && frag_id!=4) {
             saveBookmarkArraylist(getApplicationContext(), StaticUtils.savedImagesList);

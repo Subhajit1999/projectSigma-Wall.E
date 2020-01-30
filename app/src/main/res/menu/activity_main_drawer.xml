@@ -15,7 +15,7 @@
         <item
             android:id="@+id/nav_downloads"
             android:icon="@drawable/ic_menu_downloads"
-            android:title="Downloads" />
+            android:title="@string/nav_menu_downloads" />
     </group>
 
     <item android:title="@string/nav_header_communicate">
@@ -27,7 +27,7 @@
             <item
                 android:id="@+id/nav_rate"
                 android:icon="@drawable/ic_menu_rate"
-                android:title="Rate app" />
+                android:title="@string/nav_menu_rate_app" />
             <item
                 android:id="@+id/nav_about"
                 android:icon="@drawable/ic_menu_about"

@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.subhajitkar.projectsigma.hydra.R;
@@ -34,6 +35,8 @@ public class SearchFragment extends Fragment{
     private static ListView recentSearchList;
     @SuppressLint("StaticFieldLeak")
     private static SuggestionListAdapter adapter;
+    private View root;
+    public static TextView tv_no_suggestion;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -48,6 +51,8 @@ public class SearchFragment extends Fragment{
         super.onViewCreated(view, savedInstanceState);
         Log.d(TAG, "onViewCreated: initializing things");
 
+        root = view.findViewById(R.id.search_root);
+        tv_no_suggestion = view.findViewById(R.id.tv_none);
         recentSearchList = view.findViewById(R.id.search_suggest_list);
         recentSearchList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -58,7 +63,7 @@ public class SearchFragment extends Fragment{
                 i.putExtra(StaticUtils.KEY_FRAG_ID,1);
                 i.putExtra(StaticUtils.KEY_SEARCH_DATA,StaticUtils.recentSearchesList.get(ActualPosition));
 
-                if(new NetworkUtils(getContext()).checkConnection()) {  //start intent if network connected
+                if(new NetworkUtils(getContext()).checkConnection(root)) {  //start intent if network connected
                     MainActivity.searchBar.setText("");  //removes the search query
                     startActivity(i);
                 }
@@ -68,6 +73,8 @@ public class SearchFragment extends Fragment{
         adapter = new SuggestionListAdapter(getContext(),StaticUtils.recentSearchesList);
         if (!StaticUtils.recentSearchesList.isEmpty()){  //if list not empty
             recentSearchList.setAdapter(adapter);
+        }else{
+            tv_no_suggestion.setVisibility(View.VISIBLE);
         }
     }
 
@@ -76,7 +83,12 @@ public class SearchFragment extends Fragment{
         adapter = null;
         adapter = new SuggestionListAdapter(mContext,list);
         if (!StaticUtils.recentSearchesList.isEmpty()){  //if list not empty
+            if (tv_no_suggestion.getVisibility()==View.VISIBLE){
+                tv_no_suggestion.setVisibility(View.GONE);
+            }
             recentSearchList.setAdapter(adapter);
+        }else{
+            tv_no_suggestion.setVisibility(View.VISIBLE);
         }
     }
 
