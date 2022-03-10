@@ -1,5 +1,4 @@
 ## (Project Deprecated for new major update v2.0.1)
-New Project
 
 # Wall.e- finding wallpapers made simple
 An wallpaper android app, powered by Pexels.com image API.
